@@ -1,0 +1,44 @@
+{
+  "name": "crisisapp",
+  "version": "1.0.0",
+  "description": "A cross-platform social impact mobile application connecting families in crisis with a global community of supporters.",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LukeR5776/CrisisApp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LukeR5776/CrisisApp/issues"
+  },
+  "homepage": "https://github.com/LukeR5776/CrisisApp#readme",
+  "dependencies": {
+    "@react-navigation/native": "^7.1.18",
+    "expo": "^52.0.47",
+    "expo-av": "^16.0.7",
+    "expo-constants": "^18.0.9",
+    "expo-font": "^14.0.9",
+    "expo-linking": "^8.0.8",
+    "expo-router": "^6.0.13",
+    "expo-splash-screen": "^31.0.10",
+    "expo-status-bar": "^3.0.8",
+    "react": "^19.2.0",
+    "react-native": "^0.82.1",
+    "react-native-safe-area-context": "^5.6.1",
+    "react-native-screens": "^4.17.1",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2",
+    "@types/react-native": "^0.72.8",
+    "typescript": "^5.9.3"
+  }
+}

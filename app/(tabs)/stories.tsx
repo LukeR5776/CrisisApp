@@ -45,19 +45,23 @@ export default function StoriesScreen() {
   const ListHeaderComponent = () => (
     <>
       {/* Filter Tabs */}
-      <View style={styles.filterTabs}>
-        <TouchableOpacity style={styles.tab}>
-          <Text style={styles.tabIcon}>🔍</Text>
-          <Text style={styles.tabText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tab}>
-          <Text style={styles.tabIcon}>📤</Text>
-          <Text style={styles.tabText}>Send</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tab}>
-          <Text style={styles.tabIcon}>👤</Text>
-          <Text style={styles.tabText}>Profile</Text>
-        </TouchableOpacity>
+      <View style={styles.filterTabsContainer}>
+        <View style={styles.filterTabs}>
+          <TouchableOpacity
+            style={styles.tab}
+            onPress={() => router.push('/home')}
+          >
+            <Text style={styles.tabIcon}>🏠</Text>
+            <Text style={styles.tabText}>Home</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.tab}
+            onPress={() => router.push('/profile')}
+          >
+            <Text style={styles.tabIcon}>👤</Text>
+            <Text style={styles.tabText}>Profile</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Support Families Section Header */}
@@ -79,21 +83,10 @@ export default function StoriesScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity>
-          <Text style={styles.backButton}>‹</Text>
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>Stories (Explore page)</Text>
-        <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.icon}>🔍</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.icon}>✏️</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.icon}>👤</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.iconButton}>
+          <Text style={styles.icon}>🔍</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Infinite Scrolling Grid of All Families */}
@@ -130,17 +123,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  backButton: {
-    fontSize: 32,
-    fontWeight: '300',
-  },
   headerTitle: {
     fontSize: 16,
     fontWeight: '600',
-  },
-  headerIcons: {
-    flexDirection: 'row',
-    gap: 8,
   },
   iconButton: {
     padding: 4,
@@ -155,25 +140,39 @@ const styles = StyleSheet.create({
   columnWrapper: {
     justifyContent: 'space-between',
   },
-  filterTabs: {
-    flexDirection: 'row',
+  filterTabsContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    gap: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
     backgroundColor: '#fff',
+  },
+  filterTabs: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    padding: 8,
   },
   tab: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   tabIcon: {
-    fontSize: 16,
+    fontSize: 18,
   },
   tabText: {
     fontSize: 14,
+    fontWeight: '500',
   },
   sectionHeader: {
     flexDirection: 'row',

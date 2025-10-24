@@ -31,13 +31,6 @@ export default function SignIn() {
   const passwordStrength = validatePassword(password);
   const requirements = checkPasswordRequirements(password);
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (user) {
-      router.replace('/(tabs)/home');
-    }
-  }, [user]);
-
   // Check rate limit on mount
   useEffect(() => {
     checkRateLimitStatus();
@@ -106,14 +99,16 @@ export default function SignIn() {
         if (!result.error) {
           // Reset rate limit on successful signup
           await resetRateLimit();
-          router.replace('/verify-email');
+          // Root layout will handle redirect to verify-email
+        } else {
+          setError(result.error.message);
         }
       } else {
         result = await signIn(email.trim(), password);
         if (!result.error) {
           // Reset rate limit on successful login
           await resetRateLimit();
-          router.replace('/(tabs)/home');
+          // Root layout will handle redirect to home
         } else {
           // Record failed attempt
           const limitStatus = await recordFailedAttempt();
@@ -127,10 +122,6 @@ export default function SignIn() {
             setError(`${result.error.message}. ${limitStatus.remainingAttempts} attempts remaining.`);
           }
         }
-      }
-
-      if (result.error && isSignUp) {
-        setError(result.error.message);
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred');

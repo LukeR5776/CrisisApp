@@ -20,6 +20,8 @@ interface AuthState {
   signUp: (email: string, password: string, displayName: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  resendVerificationEmail: (email: string) => Promise<void>;
+  isEmailVerified: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -214,5 +216,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error('Error refreshing profile:', error);
     }
+  },
+
+  resendVerificationEmail: async (email: string) => {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+    });
+
+    if (error) throw error;
+  },
+
+  isEmailVerified: () => {
+    const { session } = get();
+    return session?.user?.email_confirmed_at !== undefined && session?.user?.email_confirmed_at !== null;
   },
 }));

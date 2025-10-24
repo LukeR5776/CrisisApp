@@ -3,30 +3,72 @@
  * Initial landing page with email/password and OAuth options
  */
 
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuthStore } from '../store/authStore';
 
 export default function SignIn() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const { user, loading, signIn, signUp } = useAuthStore();
 
-  // Handle sign in - currently just navigates to main app
-  // TODO: Implement actual authentication with Supabase
-  const handleSignIn = () => {
-    if (email.trim()) {
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [error, setError] = useState('');
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
       router.replace('/(tabs)/home');
+    }
+  }, [user]);
+
+  const handleAuth = async () => {
+    setError('');
+
+    // Validation
+    if (!email.trim() || !password.trim()) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    if (isSignUp && !displayName.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    try {
+      let result;
+      if (isSignUp) {
+        result = await signUp(email.trim(), password, displayName.trim());
+      } else {
+        result = await signIn(email.trim(), password);
+      }
+
+      if (result.error) {
+        setError(result.error.message);
+      } else {
+        // Success - navigation handled by useEffect
+        router.replace('/(tabs)/home');
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred');
     }
   };
 
   const handleGoogleSignIn = () => {
-    // TODO: Implement Google OAuth
-    router.replace('/(tabs)/home');
+    Alert.alert('Coming Soon', 'Google Sign-In will be available soon!');
   };
 
   const handleAppleSignIn = () => {
-    // TODO: Implement Apple Sign In
-    router.replace('/(tabs)/home');
+    Alert.alert('Coming Soon', 'Apple Sign-In will be available soon!');
   };
 
   return (
@@ -36,12 +78,30 @@ export default function SignIn() {
     >
       <View style={styles.content}>
         {/* App Name */}
-        <Text style={styles.appName}>App name</Text>
+        <Text style={styles.appName}>CrisisApp</Text>
 
-        {/* Create Account Section */}
+        {/* Auth Form Section */}
         <View style={styles.formSection}>
-          <Text style={styles.title}>Create an account</Text>
-          <Text style={styles.subtitle}>Enter your email to sign up for this app</Text>
+          <Text style={styles.title}>
+            {isSignUp ? 'Create an account' : 'Welcome back'}
+          </Text>
+          <Text style={styles.subtitle}>
+            {isSignUp
+              ? 'Enter your details to sign up for this app'
+              : 'Sign in to your account to continue'}
+          </Text>
+
+          {/* Display Name Input (Sign Up Only) */}
+          {isSignUp && (
+            <TextInput
+              style={styles.input}
+              placeholder="Your Name"
+              value={displayName}
+              onChangeText={setDisplayName}
+              autoCapitalize="words"
+              autoCorrect={false}
+            />
+          )}
 
           {/* Email Input */}
           <TextInput
@@ -54,12 +114,50 @@ export default function SignIn() {
             autoCorrect={false}
           />
 
-          {/* Continue Button */}
+          {/* Password Input */}
+          <TextInput
+            style={styles.input}
+            placeholder="Password (min 6 characters)"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+
+          {/* Error Message */}
+          {error ? (
+            <Text style={styles.errorText}>{error}</Text>
+          ) : null}
+
+          {/* Auth Button */}
           <TouchableOpacity
-            style={styles.continueButton}
-            onPress={handleSignIn}
+            style={[styles.continueButton, loading && styles.continueButtonDisabled]}
+            onPress={handleAuth}
+            disabled={loading}
           >
-            <Text style={styles.continueButtonText}>Continue</Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.continueButtonText}>
+                {isSignUp ? 'Sign Up' : 'Sign In'}
+              </Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Toggle Sign Up / Sign In */}
+          <TouchableOpacity
+            onPress={() => {
+              setIsSignUp(!isSignUp);
+              setError('');
+            }}
+            style={styles.toggleButton}
+          >
+            <Text style={styles.toggleText}>
+              {isSignUp
+                ? 'Already have an account? Sign In'
+                : "Don't have an account? Sign Up"}
+            </Text>
           </TouchableOpacity>
 
           {/* Divider */}
@@ -138,12 +236,31 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
+  },
+  continueButtonDisabled: {
+    backgroundColor: '#666',
   },
   continueButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  toggleButton: {
+    padding: 8,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  toggleText: {
+    color: '#0066FF',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    marginBottom: 16,
+    textAlign: 'center',
   },
   divider: {
     textAlign: 'center',

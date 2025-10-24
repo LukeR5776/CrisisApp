@@ -3,8 +3,10 @@
  * Bottom navigation bar with Home, Stories, Support, Notifications, Profile
  */
 
-import { Tabs } from 'expo-router';
+import { useEffect } from 'react';
+import { Tabs, useRouter } from 'expo-router';
 import { View, Text, StyleSheet } from 'react-native';
+import { useAuthStore } from '../../store/authStore';
 
 // Simple icon component using emojis for now
 // TODO: Replace with proper icon library (e.g., expo-vector-icons)
@@ -17,6 +19,21 @@ function TabIcon({ emoji, color }: { emoji: string; color: string }) {
 }
 
 export default function TabLayout() {
+  const router = useRouter();
+  const { user, initialized } = useAuthStore();
+
+  // Redirect to sign-in if not authenticated
+  useEffect(() => {
+    if (initialized && !user) {
+      router.replace('/');
+    }
+  }, [user, initialized]);
+
+  // Don't render tabs until we know the auth state
+  if (!initialized || !user) {
+    return null;
+  }
+
   return (
     <Tabs
       screenOptions={{

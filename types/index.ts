@@ -76,3 +76,24 @@ export interface SupporterProfile {
   donationHistory: Donation[];
   recentPosts: Post[];
 }
+
+// Auth & Database Types
+export interface Profile {
+  id: string;
+  display_name: string;
+  bio: string | null;
+  avatar_url: string | null;
+  role: 'supporter' | 'family';
+  points_earned: number;
+  current_streak: number;
+  level: number;
+  total_donations: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  profile: Profile | null;
+}

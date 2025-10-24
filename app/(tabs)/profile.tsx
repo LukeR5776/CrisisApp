@@ -3,41 +3,58 @@
  * Shows user stats, donation history, and recent posts
  */
 
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { useAuthStore } from '../../store/authStore';
 import { mockUserProfile } from '../../data/mockData';
 
 export default function ProfileScreen() {
-  const profile = mockUserProfile;
-  const stats = profile.stats;
+  const router = useRouter();
+  const { user, signOut } = useAuthStore();
+  const profile = user?.profile;
+
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            await signOut();
+            router.replace('/');
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity>
-          <Text style={styles.backButton}>‹</Text>
-        </TouchableOpacity>
+        <View style={{ width: 40 }} />
         <Text style={styles.headerTitle}>Profile</Text>
-        <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.icon}>✏️</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.icon}>⚙️</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.iconButton} onPress={handleSignOut}>
+          <Text style={styles.icon}>🚪</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile Info */}
         <View style={styles.profileSection}>
           <Image
-            source={{ uri: profile.profileImage }}
+            source={{ uri: profile?.avatar_url || 'https://via.placeholder.com/100' }}
             style={styles.profileImage}
           />
-          <Text style={styles.profileName}>{profile.name}</Text>
-          <Text style={styles.profileType}>Supporter</Text>
+          <Text style={styles.profileName}>{profile?.display_name || user?.email}</Text>
+          <Text style={styles.profileType}>
+            {profile?.role === 'supporter' ? 'Supporter' : 'Crisis Family'}
+          </Text>
+          <Text style={styles.profileEmail}>{user?.email}</Text>
         </View>
 
         {/* Your Contributions */}
@@ -53,15 +70,15 @@ export default function ProfileScreen() {
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Points Earned</Text>
-              <Text style={styles.statValue}>{stats.pointsEarned}</Text>
+              <Text style={styles.statValue}>{profile?.points_earned || 0}</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Total Donations</Text>
-              <Text style={styles.statValue}>${stats.totalDonations}</Text>
+              <Text style={styles.statValue}>${profile?.total_donations || 0}</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Level</Text>
-              <Text style={styles.statValue}>5th</Text>
+              <Text style={styles.statValue}>{profile?.level || 1}</Text>
             </View>
           </View>
         </View>
@@ -223,6 +240,11 @@ const styles = StyleSheet.create({
   profileType: {
     fontSize: 14,
     color: '#666',
+    marginBottom: 4,
+  },
+  profileEmail: {
+    fontSize: 12,
+    color: '#999',
   },
   section: {
     padding: 16,

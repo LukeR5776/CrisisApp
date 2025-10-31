@@ -41,7 +41,7 @@ export default function RootLayout() {
         router.replace('/');
       }
     }
-  }, [user, initialized, segments]);
+  }, [user, initialized]);
 
   if (loading || !initialized) {
     return (

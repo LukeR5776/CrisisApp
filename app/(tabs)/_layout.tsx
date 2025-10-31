@@ -3,8 +3,7 @@
  * Bottom navigation bar with Home, Stories, Support, Notifications, Profile
  */
 
-import { useEffect } from 'react';
-import { Tabs, useRouter } from 'expo-router';
+import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet } from 'react-native';
 import { useAuthStore } from '../../store/authStore';
 
@@ -19,17 +18,10 @@ function TabIcon({ emoji, color }: { emoji: string; color: string }) {
 }
 
 export default function TabLayout() {
-  const router = useRouter();
   const { user, initialized } = useAuthStore();
 
-  // Redirect to sign-in if not authenticated
-  useEffect(() => {
-    if (initialized && !user) {
-      router.replace('/');
-    }
-  }, [user, initialized]);
-
   // Don't render tabs until we know the auth state
+  // Note: Root layout handles all navigation redirects
   if (!initialized || !user) {
     return null;
   }

@@ -7,12 +7,17 @@ import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Alert } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../store/authStore';
-import { mockUserProfile } from '../../data/mockData';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, signOut } = useAuthStore();
   const profile = user?.profile;
+
+  // Safely get donation history (empty array if not available)
+  const donationHistory: any[] = [];
+
+  // Safely get recent posts (empty array if not available)
+  const recentPosts: any[] = [];
 
   const handleSignOut = () => {
     Alert.alert(
@@ -89,24 +94,36 @@ export default function ProfileScreen() {
             <Text style={styles.sectionTitle}>Donation History</Text>
             <Text style={styles.sectionSubtitle}>Your Support Contributions</Text>
           </View>
-          <TouchableOpacity style={styles.viewAllButton}>
-            <Text style={styles.viewAllText}>See All ›</Text>
-          </TouchableOpacity>
+          {donationHistory.length > 0 && (
+            <TouchableOpacity style={styles.viewAllButton}>
+              <Text style={styles.viewAllText}>See All ›</Text>
+            </TouchableOpacity>
+          )}
 
-          {profile.donationHistory.map((donation) => (
-            <View key={donation.id} style={styles.donationCard}>
-              <Image
-                source={{ uri: donation.familyImage }}
-                style={styles.donationFamilyImage}
-              />
-              <View style={styles.donationInfo}>
-                <Text style={styles.donationFamily}>
-                  Donation to {donation.familyName}
-                </Text>
-                <Text style={styles.donationAmount}>${donation.amount}</Text>
+          {donationHistory.length > 0 ? (
+            donationHistory.map((donation) => (
+              <View key={donation.id} style={styles.donationCard}>
+                <Image
+                  source={{ uri: donation.familyImage }}
+                  style={styles.donationFamilyImage}
+                />
+                <View style={styles.donationInfo}>
+                  <Text style={styles.donationFamily}>
+                    Donation to {donation.familyName}
+                  </Text>
+                  <Text style={styles.donationAmount}>${donation.amount}</Text>
+                </View>
               </View>
+            ))
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateIcon}>💝</Text>
+              <Text style={styles.emptyStateTitle}>No donations yet</Text>
+              <Text style={styles.emptyStateText}>
+                Start supporting families in need to see your donation history here
+              </Text>
             </View>
-          ))}
+          )}
         </View>
 
         {/* Action Buttons */}
@@ -133,26 +150,6 @@ export default function ProfileScreen() {
           <TouchableOpacity style={styles.viewAllButton}>
             <Text style={styles.viewAllText}>See All ›</Text>
           </TouchableOpacity>
-
-          <View style={styles.postsGrid}>
-            {profile.recentPosts.map((post) => (
-              <View key={post.id} style={styles.postCard}>
-                <Image
-                  source={{ uri: post.mediaUrl }}
-                  style={styles.postImage}
-                />
-                <View style={styles.postOverlay}>
-                  <Text style={styles.postCaption} numberOfLines={2}>
-                    {post.caption}
-                  </Text>
-                  <View style={styles.postAuthor}>
-                    <Text style={styles.postAuthorText}>#Support</Text>
-                    <Text style={styles.postAuthorText}>#Family</Text>
-                  </View>
-                </View>
-              </View>
-            ))}
-          </View>
 
           {/* Placeholder posts */}
           <View style={styles.postsGrid}>
@@ -357,6 +354,26 @@ const styles = StyleSheet.create({
   },
   donateButtonText: {
     color: '#fff',
+  },
+  emptyState: {
+    padding: 32,
+    alignItems: 'center',
+  },
+  emptyStateIcon: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  emptyStateTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 20,
   },
   postsGrid: {
     flexDirection: 'row',

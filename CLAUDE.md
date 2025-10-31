@@ -7,29 +7,38 @@
 ### Mission
 Provide a platform for crisis families to share their stories and receive direct support through a compassionate global community using engaging social media-style content delivery.
 
-## Current Status: MVP Phase 1
+## Current Status: MVP Phase 1 - Authentication Complete
 
-All core screens have been built and are interactive. The app uses mock data and placeholder authentication. Ready for testing on iOS/Android simulators.
+All core screens have been built and are interactive. **Real authentication via Supabase is now fully implemented and tested.** The app uses a mix of real auth data and mock content data. Ready for testing on iOS/Android simulators.
 
 ### Completed Features ✅
-- Sign In screen (email input + OAuth placeholders)
+- **Real Supabase Authentication System** ✨ NEW
+  - Email/password sign-up with password strength validation
+  - Email/password sign-in with rate limiting (5 attempts, 15-min lockout)
+  - Email verification flow with resend capability
+  - Password reset functionality
+  - Secure session management with AsyncStorage
+  - Profile creation and management in PostgreSQL
+  - Zustand state management for auth state
+- Sign In/Sign Up screen (real authentication + OAuth placeholders)
+- Email verification screen with status checking
+- Password reset and update screens
 - Home dashboard (Instagram-style feed with user stats)
 - Stories/Explore page (grid of featured families)
 - Support/Reels screen (TikTok-style vertical video scroll)
-- Supporter profile (donation history, stats, badges)
+- Supporter profile (real user data, placeholder donations/posts)
 - Crisis family profile (view-only fundraising details)
 - Notifications screen
-- Bottom tab navigation (persistent across all screens)
+- Bottom tab navigation (persistent across all screens, protected by auth)
 - Mock data structure (families, posts, donations, user stats)
 - TypeScript type definitions
 - Git repository connected to GitHub
 
 ### Not Yet Implemented 🚧
-- Real authentication (Supabase Auth)
-- Backend integration (Supabase PostgreSQL)
+- Backend integration for content (posts, families, donations)
 - Actual video upload/processing
-- Real donation processing
-- Points/gamification logic
+- Real donation processing and tracking
+- Points/gamification logic implementation
 - Content moderation tools
 - Social media sharing
 - Push notifications
@@ -42,13 +51,17 @@ All core screens have been built and are interactive. The app uses mock data and
 - **Expo Router** (v6) - File-based navigation
 - **TypeScript** - Type safety throughout
 
-### Planned Backend (Not Implemented Yet)
-- **Supabase Auth** - User authentication
-- **Supabase PostgreSQL** - Database
-- **Supabase Storage** - Media hosting
-- **Zustand** - State management (installed but not used yet)
+### Backend (Now Implemented) ✨
+- **Supabase Auth** - User authentication (LIVE)
+- **Supabase PostgreSQL** - Database with profiles table (LIVE)
+- **Supabase Storage** - Media hosting (configured, not yet used)
+- **Zustand** - State management for auth (LIVE)
+- **AsyncStorage** - Secure session persistence (LIVE)
 
 ### Key Dependencies
+- `@supabase/supabase-js` - Supabase client SDK
+- `@react-native-async-storage/async-storage` - Session storage
+- `zustand` - State management
 - `expo-av` - Video playback
 - `react-navigation/native` - Navigation
 - `react-native-safe-area-context` - Safe area handling
@@ -59,22 +72,32 @@ All core screens have been built and are interactive. The app uses mock data and
 ```
 /CrisisApp
 ├── /app                          # Expo Router pages
-│   ├── /(tabs)                  # Tab navigation group
+│   ├── /(tabs)                  # Tab navigation group (auth-protected)
 │   │   ├── _layout.tsx         # Tab bar configuration
 │   │   ├── home.tsx            # Home feed with posts and stats
 │   │   ├── stories.tsx         # Explore/Stories grid
 │   │   ├── support.tsx         # Reels-style video scroll
 │   │   ├── notifications.tsx   # Notifications screen
-│   │   └── profile.tsx         # Supporter profile
+│   │   └── profile.tsx         # Supporter profile (real auth data)
 │   ├── /family/[id].tsx        # Dynamic family profile route
-│   ├── _layout.tsx             # Root layout
-│   └── index.tsx               # Sign In screen (entry point)
+│   ├── _layout.tsx             # Root layout (auth navigation controller)
+│   ├── index.tsx               # Sign In/Sign Up screen (entry point)
+│   ├── verify-email.tsx        # Email verification pending screen
+│   ├── reset-password.tsx      # Password reset request screen
+│   └── update-password.tsx     # New password entry screen
+├── /lib                          # Utility libraries ✨ NEW
+│   ├── supabase.ts             # Supabase client configuration
+│   ├── passwordValidator.ts    # Password strength checking
+│   └── rateLimiter.ts          # Login rate limiting logic
+├── /store                        # State management ✨ NEW
+│   └── authStore.ts            # Zustand auth store
 ├── /data
-│   └── mockData.ts             # All mock data (families, posts, donations)
+│   └── mockData.ts             # Mock content data (families, posts, donations)
 ├── /types
-│   └── index.ts                # TypeScript type definitions
+│   └── index.ts                # TypeScript type definitions (including auth types)
 ├── README.md                    # Project documentation
 ├── SETUP.md                     # Setup and run instructions
+├── CLAUDE.md                    # This file - Claude Code context
 ├── app.json                     # Expo configuration
 ├── package.json                 # Dependencies
 └── tsconfig.json               # TypeScript config
@@ -82,17 +105,38 @@ All core screens have been built and are interactive. The app uses mock data and
 
 ## Key Architecture Decisions
 
-### Navigation
+### Navigation ✨ UPDATED
 - **Expo Router** file-based routing (routes match file structure)
-- Bottom tabs defined in `app/(tabs)/_layout.tsx`
+- **Root Layout** (`app/_layout.tsx`) - Central auth navigation controller
+  - Manages all authentication-based redirects
+  - Checks email verification status
+  - Single source of truth for routing decisions
+  - Shows loading screen while auth initializes
+- **Tab Layout** (`app/(tabs)/_layout.tsx`) - Protected tab navigation
+  - Only renders if user is authenticated
+  - Returns null for unauthenticated users (no navigation loops)
+  - Bottom tabs with Home, Stories, Support, Notifications, Profile
 - Dynamic routes use `[id]` syntax (e.g., `family/[id].tsx`)
-- Sign in screen is the index route, tabs are protected behind it
+- Sign in screen is the index route
+- Email verification screen blocks access to tabs until verified
+
+### Authentication Flow
+1. App starts → Root layout initializes auth state
+2. Checks Supabase session from AsyncStorage
+3. If session exists → fetch user profile from PostgreSQL
+4. Route user based on state:
+   - No user → redirect to sign-in (`/`)
+   - User but unverified → redirect to verify-email (`/verify-email`)
+   - User and verified → allow access to tabs (`/(tabs)/home`)
+5. Auth state changes trigger navigation automatically
+6. onAuthStateChange listener keeps state synchronized
 
 ### Data Flow (Current MVP)
-1. All data is imported from `data/mockData.ts`
-2. Components render mock data directly
-3. No state management needed yet (Zustand installed for future)
+1. **Authentication data** - Real Supabase Auth + PostgreSQL profiles
+2. **Content data** - Still uses `data/mockData.ts` (families, posts, donations)
+3. **State management** - Zustand for auth state, direct imports for mock data
 4. Navigation uses `useRouter()` from expo-router
+5. Profile screen shows real user data, placeholder donation/post data
 
 ### User Types
 - **Supporters**: Can view content, donate (external links), earn points/badges
@@ -103,6 +147,146 @@ All core screens have been built and are interactive. The app uses mock data and
 - **Fundraising**: Links to external platforms (GoFundMe, etc.) - no in-app payment processing
 - **Videos**: Sample videos from Google's test library
 - **Images**: Placeholder images (placeholder.com)
+
+## Authentication System ✨ NEW
+
+### Security Features Implemented
+
+#### Password Validation (`lib/passwordValidator.ts`)
+- **Minimum 8 characters** required for sign-up
+- **Strength scoring** (0-4 scale):
+  - Weak (0-1): Red indicator
+  - Fair (2): Orange indicator
+  - Good (3): Yellow indicator
+  - Strong (4): Green indicator
+- **Real-time requirements checking**:
+  - Uppercase letter (A-Z)
+  - Lowercase letter (a-z)
+  - Number (0-9)
+  - Special character (!@#$%^&*(),.?":{}|<>)
+  - Not in common password list (top 100 most common)
+- Visual strength bar shows during password entry
+- Requirements checklist with green checkmarks
+
+#### Rate Limiting (`lib/rateLimiter.ts`)
+- **5 failed login attempts** allowed
+- **15-minute lockout** after exceeding limit
+- Uses AsyncStorage to persist attempt data
+- Shows remaining attempts after each failure
+- Countdown timer displays during lockout
+- Auto-resets after successful login
+- Prevents brute-force attacks
+
+#### Email Verification
+- Required for all new accounts
+- Verification email sent automatically on sign-up
+- Blocks access to app tabs until verified
+- Resend verification email functionality
+- Clear instructions and troubleshooting tips
+- Sign-out option if wrong email used
+
+#### Session Management
+- Persistent sessions via AsyncStorage
+- Auto-refresh tokens (Supabase built-in)
+- Session survives app restarts
+- Secure storage of credentials
+- Automatic cleanup on sign-out
+
+### Authentication Screens
+
+#### Sign In/Sign Up (`app/index.tsx`)
+- Toggle between sign-in and sign-up modes
+- Email and password inputs
+- Display name field (sign-up only)
+- Password strength indicator (sign-up only)
+- Real-time validation feedback
+- Rate limit warnings
+- Lockout screen with countdown
+- OAuth placeholders (Google, Apple - coming soon)
+- "Forgot password?" link
+- Terms of Service and Privacy Policy text
+
+#### Email Verification (`app/verify-email.tsx`)
+- Large email icon for visual clarity
+- Shows user's email address
+- Clear verification instructions
+- Troubleshooting tips (check spam, wait, etc.)
+- "Resend verification email" button
+- Success/error feedback on resend
+- Sign-out option to change email
+
+#### Password Reset (`app/reset-password.tsx`)
+- Email input for reset request
+- Sends password reset link via Supabase
+- Clear instructions for checking email
+- Link to return to sign-in
+
+#### Update Password (`app/update-password.tsx`)
+- New password entry (with validation)
+- Confirm password field
+- Same strength requirements as sign-up
+- Updates password in Supabase
+- Redirects to home on success
+
+### Authentication Store (`store/authStore.ts`)
+- **Zustand** state management
+- **State properties**:
+  - `user`: Current user object with profile
+  - `session`: Supabase session
+  - `loading`: Loading state for async operations
+  - `initialized`: Whether auth has been initialized
+- **Actions**:
+  - `initialize()`: Load session on app start
+  - `signIn(email, password)`: Authenticate user
+  - `signUp(email, password, displayName)`: Create account
+  - `signOut()`: Clear session and redirect
+  - `refreshProfile()`: Reload user profile data
+  - `resendVerificationEmail(email)`: Send new verification
+  - `isEmailVerified()`: Check verification status
+- **Auth state listener**: Syncs state on session changes
+- **Profile creation**: Automatic on sign-up with default values
+
+### Supabase Configuration (`lib/supabase.ts`)
+- Connected to production Supabase instance
+- AsyncStorage for session persistence
+- Auto-refresh tokens enabled
+- Persistent sessions enabled
+- URL detection disabled (mobile app)
+
+### Database Schema
+
+#### profiles table (PostgreSQL)
+```sql
+- id: uuid (primary key, references auth.users)
+- display_name: text
+- role: text ('supporter' or 'crisis_family')
+- avatar_url: text (nullable)
+- bio: text (nullable)
+- points_earned: integer (default 0)
+- current_streak: integer (default 0)
+- level: integer (default 1)
+- total_donations: numeric (default 0)
+- created_at: timestamp
+- updated_at: timestamp
+```
+
+### Navigation Protection
+
+#### Root Layout (`app/_layout.tsx`)
+- Initializes auth on app load
+- Shows loading screen during initialization
+- Routes users based on auth state:
+  - Not authenticated → `/` (sign-in)
+  - Authenticated but unverified → `/verify-email`
+  - Authenticated and verified → `/(tabs)/home`
+- Single source of truth for navigation
+- Prevents navigation race conditions
+
+#### Tab Layout (`app/(tabs)/_layout.tsx`)
+- Returns `null` if not authenticated (blocks rendering)
+- Only shows tabs for verified users
+- No redundant navigation logic
+- Relies on root layout for redirects
 
 ## Mock Data Structure
 
@@ -146,16 +330,33 @@ Located in `data/mockData.ts`:
 - Finds family from mock data by ID
 - "Donate Now" opens external URL with `Linking.openURL()`
 
-### Navigation Flow
+### Navigation Flow ✨ UPDATED
 ```
-index.tsx (Sign In)
-    ↓ (any email input proceeds)
-(tabs)/_layout.tsx (Tab Navigator)
-    ├── home.tsx
-    ├── stories.tsx → family/[id].tsx (tap family card)
-    ├── support.tsx
-    ├── notifications.tsx
-    └── profile.tsx
+_layout.tsx (Root - Auth Controller)
+    │
+    ├─→ Not authenticated
+    │   └─→ index.tsx (Sign In/Sign Up)
+    │       ├─→ Sign up success → verify-email.tsx
+    │       └─→ Sign in success → check verification
+    │
+    ├─→ Authenticated but unverified email
+    │   └─→ verify-email.tsx
+    │       ├─→ Resend verification email
+    │       ├─→ Sign out
+    │       └─→ After verification → (tabs)/home
+    │
+    ├─→ Forgot password flow
+    │   └─→ reset-password.tsx
+    │       └─→ update-password.tsx → back to sign-in
+    │
+    └─→ Authenticated AND verified
+        └─→ (tabs)/_layout.tsx (Tab Navigator)
+            ├── home.tsx
+            ├── stories.tsx → family/[id].tsx (tap family card)
+            ├── support.tsx
+            ├── notifications.tsx
+            └── profile.tsx (shows real user data)
+                └─→ Sign out → back to index.tsx
 ```
 
 ### Styling Approach

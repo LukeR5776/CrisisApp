@@ -135,6 +135,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           data: {
             display_name: displayName,
           },
+          emailRedirectTo: 'crisisapp://callback', // Deep link for email verification
         },
       });
 
@@ -222,6 +223,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { error } = await supabase.auth.resend({
       type: 'signup',
       email,
+      options: {
+        emailRedirectTo: 'crisisapp://callback', // Deep link for email verification
+      },
     });
 
     if (error) throw error;

@@ -1,0 +1,40 @@
+{
+  "name": "The Johnson Family",
+  "location": "Aleppo, Syria",
+  "situation": "Displaced by war",
+  "story": "We fled our home in Aleppo in 2016 when the bombings intensified. Now living in a refugee camp with limited resources, we dream of rebuilding our lives and providing education for our children. Your support means everything to us as we work towards a better future.",
+  "profile_image_url": "https://your-supabase-url/storage/v1/object/public/family-images/johnson-profile.jpg",
+  "cover_image_url": "https://your-supabase-url/storage/v1/object/public/family-images/johnson-cover.jpg",
+  "video_url": "https://your-supabase-url/storage/v1/object/public/family-videos/johnson-story.mp4",
+  "fundraising_link": "https://gofundme.com/johnson-family",
+  "fundraising_goal": 15000,
+  "fundraising_current": 5800,
+  "verified": true,
+  "tags": ["#Syria", "#War", "#Hope", "#Education"],
+  "needs": [
+    {
+      "id": "1",
+      "icon": "🍲",
+      "title": "Emergency Food Supply",
+      "description": "Basic nutrition for family of 5"
+    },
+    {
+      "id": "2",
+      "icon": "🏥",
+      "title": "Medical Care",
+      "description": "Access to healthcare and medicine"
+    },
+    {
+      "id": "3",
+      "icon": "📚",
+      "title": "Education",
+      "description": "School supplies and tuition for children"
+    },
+    {
+      "id": "4",
+      "icon": "🏠",
+      "title": "Shelter",
+      "description": "Safe housing and basic living supplies"
+    }
+  ]
+}

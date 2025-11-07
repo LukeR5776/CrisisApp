@@ -3,22 +3,82 @@
  * Detailed profile of a crisis family with their story, needs, and fundraising info
  */
 
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Linking, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { mockFamilies } from '../../data/mockData';
+import { useState, useEffect } from 'react';
+import { fetchFamilyById } from '../../lib/familiesService';
+import type { CrisisFamily } from '../../types';
 
 export default function FamilyProfileScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const [family, setFamily] = useState<CrisisFamily | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Find the family by ID
-  const family = mockFamilies.find((f) => f.id === id);
+  // Fetch family from Supabase when ID changes
+  useEffect(() => {
+    if (typeof id === 'string') {
+      loadFamily(id);
+    }
+  }, [id]);
 
-  if (!family) {
+  const loadFamily = async (familyId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await fetchFamilyById(familyId);
+      setFamily(data);
+    } catch (err) {
+      console.error('Error loading family:', err);
+      setError('Failed to load family profile. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Loading state
+  if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text>Family not found</Text>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Text style={styles.backButton}>‹</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Fundraising Profile</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#0066FF" />
+          <Text style={styles.loadingText}>Loading family profile...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Error state
+  if (error || !family) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Text style={styles.backButton}>‹</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Fundraising Profile</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>
+            {error || 'Family not found'}
+          </Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => typeof id === 'string' && loadFamily(id)}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
@@ -346,5 +406,33 @@ const styles = StyleSheet.create({
   },
   fundingGoal: {
     alignItems: 'flex-end',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#666',
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#d32f2f',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: '#0066FF',
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

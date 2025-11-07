@@ -3,19 +3,39 @@
  * TikTok/Reels-style vertical video scrolling
  */
 
-import { View, Text, Dimensions, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, Dimensions, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Video, ResizeMode } from 'expo-av';
-import { useState } from 'react';
-import { mockFamilies } from '../../data/mockData';
+import { useState, useEffect } from 'react';
+import { fetchFamiliesWithVideos } from '../../lib/familiesService';
+import type { CrisisFamily } from '../../types';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// Filter families that have video content
-const videoPosts = mockFamilies.filter(family => family.videoUrl);
-
 export default function SupportScreen() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [videoPosts, setVideoPosts] = useState<CrisisFamily[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch families with videos from Supabase on mount
+  useEffect(() => {
+    loadVideos();
+  }, []);
+
+  const loadVideos = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await fetchFamiliesWithVideos();
+      setVideoPosts(data);
+    } catch (err) {
+      console.error('Error loading videos:', err);
+      setError('Failed to load videos. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handle video scroll to track which video should be playing
   const onViewableItemsChanged = ({ viewableItems }: any) => {
@@ -114,21 +134,49 @@ export default function SupportScreen() {
         <View style={{ width: 32 }} />
       </View>
 
+      {/* Loading State */}
+      {loading && (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#fff" />
+          <Text style={styles.loadingText}>Loading videos...</Text>
+        </View>
+      )}
+
+      {/* Error State */}
+      {error && !loading && (
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={loadVideos}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Empty State */}
+      {!loading && !error && videoPosts.length === 0 && (
+        <View style={styles.centerContainer}>
+          <Text style={styles.emptyText}>No videos yet</Text>
+          <Text style={styles.emptySubtext}>Check back soon for family stories</Text>
+        </View>
+      )}
+
       {/* Vertical Scrolling Video Feed */}
-      <FlatList
-        data={videoPosts.length > 0 ? videoPosts : mockFamilies.slice(0, 3)}
-        renderItem={renderVideoPost}
-        keyExtractor={(item) => item.id}
-        pagingEnabled
-        showsVerticalScrollIndicator={false}
-        snapToInterval={SCREEN_HEIGHT - 80} // Subtract tab bar height
-        snapToAlignment="start"
-        decelerationRate="fast"
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{
-          itemVisiblePercentThreshold: 50,
-        }}
-      />
+      {!loading && !error && videoPosts.length > 0 && (
+        <FlatList
+          data={videoPosts}
+          renderItem={renderVideoPost}
+          keyExtractor={(item) => item.id}
+          pagingEnabled
+          showsVerticalScrollIndicator={false}
+          snapToInterval={SCREEN_HEIGHT - 80} // Subtract tab bar height
+          snapToAlignment="start"
+          decelerationRate="fast"
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={{
+            itemVisiblePercentThreshold: 50,
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -265,5 +313,44 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: '600',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#fff',
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#ff6b6b',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#000',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#ccc',
+    textAlign: 'center',
   },
 });

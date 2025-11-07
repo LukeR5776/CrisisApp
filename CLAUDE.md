@@ -7,12 +7,12 @@
 ### Mission
 Provide a platform for crisis families to share their stories and receive direct support through a compassionate global community using engaging social media-style content delivery.
 
-## Current Status: MVP Phase 1 - Authentication Complete
+## Current Status: MVP Phase 2 - Real Content System Complete
 
-All core screens have been built and are interactive. **Real authentication via Supabase is now fully implemented and tested.** The app uses a mix of real auth data and mock content data. Ready for testing on iOS/Android simulators.
+All core screens have been built and are interactive. **Real authentication AND real crisis family content via Supabase is now fully implemented.** The app uses real data for both auth and family profiles. Ready for demo with uploaded content on iOS/Android simulators.
 
 ### Completed Features ✅
-- **Real Supabase Authentication System** ✨ NEW
+- **Real Supabase Authentication System** ✅
   - Email/password sign-up with password strength validation
   - Email/password sign-in with rate limiting (5 attempts, 15-min lockout)
   - Email verification flow with resend capability
@@ -20,23 +20,32 @@ All core screens have been built and are interactive. **Real authentication via 
   - Secure session management with AsyncStorage
   - Profile creation and management in PostgreSQL
   - Zustand state management for auth state
+- **Real Crisis Families Content System** ✨ NEW
+  - PostgreSQL database table for crisis families
+  - Supabase Storage buckets for videos and images
+  - Family data service layer with TypeScript types
+  - Stories screen fetches families from database
+  - Support/Reels screen fetches families with videos
+  - Family profile screen fetches by ID from database
+  - Helper script for adding families to database
+  - Complete upload workflow documentation
 - Sign In/Sign Up screen (real authentication + OAuth placeholders)
 - Email verification screen with status checking
 - Password reset and update screens
 - Home dashboard (Instagram-style feed with user stats)
-- Stories/Explore page (grid of featured families)
-- Support/Reels screen (TikTok-style vertical video scroll)
+- Stories/Explore page (grid of real families from database)
+- Support/Reels screen (TikTok-style vertical video scroll with real videos)
 - Supporter profile (real user data, placeholder donations/posts)
-- Crisis family profile (view-only fundraising details)
+- Crisis family profile (view-only fundraising details from database)
 - Notifications screen
 - Bottom tab navigation (persistent across all screens, protected by auth)
-- Mock data structure (families, posts, donations, user stats)
 - TypeScript type definitions
 - Git repository connected to GitHub
 
 ### Not Yet Implemented 🚧
-- Backend integration for content (posts, families, donations)
-- Actual video upload/processing
+- Posts/feed content (home screen still uses mock data)
+- User-generated content (donations tracking, comments, likes)
+- Actual video upload from mobile app
 - Real donation processing and tracking
 - Points/gamification logic implementation
 - Content moderation tools
@@ -53,8 +62,8 @@ All core screens have been built and are interactive. **Real authentication via 
 
 ### Backend (Now Implemented) ✨
 - **Supabase Auth** - User authentication (LIVE)
-- **Supabase PostgreSQL** - Database with profiles table (LIVE)
-- **Supabase Storage** - Media hosting (configured, not yet used)
+- **Supabase PostgreSQL** - Database with profiles and crisis_families tables (LIVE)
+- **Supabase Storage** - Media hosting for videos and images (LIVE)
 - **Zustand** - State management for auth (LIVE)
 - **AsyncStorage** - Secure session persistence (LIVE)
 
@@ -75,28 +84,37 @@ All core screens have been built and are interactive. **Real authentication via 
 │   ├── /(tabs)                  # Tab navigation group (auth-protected)
 │   │   ├── _layout.tsx         # Tab bar configuration
 │   │   ├── home.tsx            # Home feed with posts and stats
-│   │   ├── stories.tsx         # Explore/Stories grid
-│   │   ├── support.tsx         # Reels-style video scroll
+│   │   ├── stories.tsx         # Explore/Stories grid (fetches from Supabase)
+│   │   ├── support.tsx         # Reels-style video scroll (fetches from Supabase)
 │   │   ├── notifications.tsx   # Notifications screen
 │   │   └── profile.tsx         # Supporter profile (real auth data)
-│   ├── /family/[id].tsx        # Dynamic family profile route
+│   ├── /family/[id].tsx        # Dynamic family profile route (fetches from Supabase)
 │   ├── _layout.tsx             # Root layout (auth navigation controller)
 │   ├── index.tsx               # Sign In/Sign Up screen (entry point)
 │   ├── verify-email.tsx        # Email verification pending screen
 │   ├── reset-password.tsx      # Password reset request screen
 │   └── update-password.tsx     # New password entry screen
-├── /lib                          # Utility libraries ✨ NEW
+├── /lib                          # Utility libraries
 │   ├── supabase.ts             # Supabase client configuration
 │   ├── passwordValidator.ts    # Password strength checking
-│   └── rateLimiter.ts          # Login rate limiting logic
-├── /store                        # State management ✨ NEW
+│   ├── rateLimiter.ts          # Login rate limiting logic
+│   └── familiesService.ts      # Crisis families data service ✨ NEW
+├── /store                        # State management
 │   └── authStore.ts            # Zustand auth store
 ├── /data
-│   └── mockData.ts             # Mock content data (families, posts, donations)
+│   └── mockData.ts             # Mock data (posts, donations - families deprecated)
 ├── /types
-│   └── index.ts                # TypeScript type definitions (including auth types)
+│   └── index.ts                # TypeScript type definitions
+├── /supabase                     # Database migrations ✨ NEW
+│   ├── storage-setup.sql       # Storage buckets configuration
+│   └── crisis-families-migration.sql  # Crisis families table schema
+├── /scripts                      # Helper scripts ✨ NEW
+│   ├── addFamily.ts            # Add families to database
+│   ├── example-family.json     # Example family data template
+│   └── README.md               # Scripts documentation
 ├── README.md                    # Project documentation
 ├── SETUP.md                     # Setup and run instructions
+├── UPLOAD_GUIDE.md              # Video & profile upload guide ✨ NEW
 ├── CLAUDE.md                    # This file - Claude Code context
 ├── app.json                     # Expo configuration
 ├── package.json                 # Dependencies
@@ -131,12 +149,15 @@ All core screens have been built and are interactive. **Real authentication via 
 5. Auth state changes trigger navigation automatically
 6. onAuthStateChange listener keeps state synchronized
 
-### Data Flow (Current MVP)
+### Data Flow (Current MVP) ✨ UPDATED
 1. **Authentication data** - Real Supabase Auth + PostgreSQL profiles
-2. **Content data** - Still uses `data/mockData.ts` (families, posts, donations)
-3. **State management** - Zustand for auth state, direct imports for mock data
-4. Navigation uses `useRouter()` from expo-router
-5. Profile screen shows real user data, placeholder donation/post data
+2. **Crisis families data** - Real Supabase PostgreSQL crisis_families table ✨ NEW
+3. **Videos & images** - Real Supabase Storage (family-videos, family-images buckets) ✨ NEW
+4. **Posts/donations data** - Still uses `data/mockData.ts` (home feed not yet connected)
+5. **State management** - Zustand for auth state, React useState/useEffect for families data
+6. **Data fetching** - familiesService.ts provides type-safe Supabase queries
+7. Navigation uses `useRouter()` from expo-router
+8. All family-related screens fetch real data from database
 
 ### User Types
 - **Supporters**: Can view content, donate (external links), earn points/badges
@@ -145,8 +166,8 @@ All core screens have been built and are interactive. **Real authentication via 
 
 ### External Dependencies
 - **Fundraising**: Links to external platforms (GoFundMe, etc.) - no in-app payment processing
-- **Videos**: Sample videos from Google's test library
-- **Images**: Placeholder images (placeholder.com)
+- **Videos**: Uploaded to Supabase Storage (manually via dashboard) ✨ UPDATED
+- **Images**: Uploaded to Supabase Storage (manually via dashboard) ✨ UPDATED
 
 ## Authentication System ✨ NEW
 
@@ -270,6 +291,188 @@ All core screens have been built and are interactive. **Real authentication via 
 - updated_at: timestamp
 ```
 
+#### crisis_families table (PostgreSQL) ✨ NEW
+```sql
+- id: uuid (primary key, auto-generated)
+- name: text (family name)
+- location: text (current location)
+- situation: text (brief crisis description)
+- story: text (full story, 2-3 paragraphs)
+- profile_image_url: text (square profile photo from Storage)
+- cover_image_url: text (landscape cover photo from Storage, nullable)
+- video_url: text (video story from Storage, nullable)
+- fundraising_link: text (external GoFundMe/etc. link)
+- fundraising_goal: numeric (target amount in USD)
+- fundraising_current: numeric (amount raised so far)
+- verified: boolean (verification status)
+- tags: text[] (hashtags array)
+- needs: jsonb (array of need objects with id, icon, title, description)
+- created_at: timestamp
+- updated_at: timestamp
+```
+
+**Row Level Security (RLS) Policies:**
+- Public read access (anyone can view families)
+- Authenticated users with 'family' role can insert their own profile
+- Authenticated users with 'family' role can update/delete their own profile
+
+## Crisis Families Content System ✨ NEW
+
+### Overview
+Crisis families are now stored in Supabase and fetched dynamically by the app. Videos and images are hosted in Supabase Storage buckets. This system is production-ready and supports real content for demos.
+
+### Supabase Storage Buckets
+
+#### family-videos bucket
+- Stores video files (MP4 recommended)
+- Public read access
+- Authenticated write/update/delete
+- Used by Support/Reels screen for vertical video scrolling
+
+#### family-images bucket
+- Stores profile and cover images (JPEG/PNG)
+- Public read access
+- Authenticated write/update/delete
+- Used by Stories grid and family profile screens
+
+### Data Service Layer (`lib/familiesService.ts`)
+
+Provides type-safe functions for fetching family data:
+
+#### `fetchAllFamilies(options?)`
+- Fetches all crisis families from database
+- Optional filters: limit, verified status, ordering
+- Returns: `Promise<CrisisFamily[]>`
+- Used by: Stories screen
+
+#### `fetchFamilyById(id)`
+- Fetches single family by UUID
+- Returns: `Promise<CrisisFamily | null>`
+- Used by: Family profile screen
+
+#### `fetchFamiliesWithVideos(options?)`
+- Fetches only families that have video_url
+- Optional limit parameter
+- Returns: `Promise<CrisisFamily[]>`
+- Used by: Support/Reels screen
+
+#### `searchFamilies(searchTerm)`
+- Search families by name, location, or tags
+- Returns: `Promise<CrisisFamily[]>`
+- Used by: (Future search feature)
+
+#### `getFamiliesCount(verified?)`
+- Get total count of families
+- Optional filter by verification status
+- Returns: `Promise<number>`
+- Used by: (Future analytics)
+
+**Data Transformation:**
+- Service layer transforms snake_case database fields to camelCase TypeScript
+- Validates data against CrisisFamily interface
+- Handles errors gracefully with console logging
+
+### Screen Implementation
+
+#### Stories Screen (`app/(tabs)/stories.tsx`)
+- Fetches all families on mount using `fetchAllFamilies()`
+- Displays in 2-column grid with FlatList
+- Shows loading spinner during fetch
+- Error state with retry button
+- Empty state for no families
+- Real-time data from database (no mock data)
+
+#### Support/Reels Screen (`app/(tabs)/support.tsx`)
+- Fetches families with videos using `fetchFamiliesWithVideos()`
+- Displays in vertical scroll with video auto-play
+- Loading/error/empty states
+- Videos stream from Supabase Storage
+- Full-screen TikTok/Reels style
+
+#### Family Profile Screen (`app/family/[id].tsx`)
+- Fetches single family by ID using `fetchFamilyById()`
+- Shows loading spinner while fetching
+- Error state if family not found
+- Displays full profile with story, needs, fundraising progress
+- "Donate Now" opens external fundraising link
+
+### Content Upload Workflow
+
+**For demo/testing purposes**, families are added manually via:
+
+1. **Upload media to Supabase Storage** (via dashboard):
+   - Navigate to Storage in Supabase dashboard
+   - Upload videos to `family-videos` bucket
+   - Upload images to `family-images` bucket
+   - Copy public URLs for each file
+
+2. **Create family data JSON**:
+   - Use `scripts/example-family.json` as template
+   - Fill in family details with Storage URLs
+   - Include fundraising links (can be placeholder)
+
+3. **Run helper script**:
+   ```bash
+   npm run add-family my-family.json
+   ```
+   or
+   ```bash
+   npx ts-node scripts/addFamily.ts my-family.json
+   ```
+
+4. **Verify in app**:
+   - Reload app
+   - Check Stories grid for new family
+   - View video in Support/Reels
+   - Tap to view full profile
+
+**See `UPLOAD_GUIDE.md` for complete step-by-step instructions.**
+
+### Helper Script (`scripts/addFamily.ts`)
+
+Node.js/TypeScript script for easily adding families to database:
+
+**Features:**
+- Validates JSON structure before inserting
+- Checks required fields (name, location, story, etc.)
+- Validates needs array structure
+- Inserts into Supabase crisis_families table
+- Returns family ID and confirmation
+- Shows helpful error messages
+
+**Usage:**
+```bash
+# Show help and example JSON structure
+npx ts-node scripts/addFamily.ts --help
+
+# Add a family from JSON file
+npx ts-node scripts/addFamily.ts path/to/family.json
+
+# Or use npm script
+npm run add-family family.json
+```
+
+**Requirements:**
+- Environment variables set (EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY)
+- Valid JSON file with all required fields
+- ts-node and @types/node installed (dev dependencies)
+
+### Database Migrations
+
+#### Storage Setup (`supabase/storage-setup.sql`)
+Run this in Supabase SQL Editor to:
+- Create `family-videos` and `family-images` buckets
+- Set up public read access policies
+- Allow authenticated users to upload/update/delete
+
+#### Crisis Families Table (`supabase/crisis-families-migration.sql`)
+Run this in Supabase SQL Editor to:
+- Create `crisis_families` table with full schema
+- Set up RLS policies (public read, authenticated family write)
+- Create indexes on created_at, verified, tags
+- Add triggers for updated_at auto-update
+- Add validation function for needs JSONB structure
+
 ### Navigation Protection
 
 #### Root Layout (`app/_layout.tsx`)
@@ -288,47 +491,60 @@ All core screens have been built and are interactive. **Real authentication via 
 - No redundant navigation logic
 - Relies on root layout for redirects
 
-## Mock Data Structure
+## Mock Data Structure (Deprecated) ✨ UPDATED
 
 Located in `data/mockData.ts`:
 
-```typescript
-// 4 crisis families with:
-- Basic info (name, location, situation)
-- Story text
-- Profile/cover images
-- Video URLs (sample)
-- Fundraising links and goals
-- Needs list (Emergency Supplies, Financial Support, etc.)
-- Verification status
-- Tags
+**Note:** Crisis families data is now deprecated in mock data. Families are fetched from Supabase database instead.
 
-// Posts for home feed with:
+```typescript
+// DEPRECATED: Crisis families (now fetched from Supabase)
+// Previously had 50+ mock families - no longer used
+
+// Posts for home feed (still mock):
 - Family attribution
 - Media (photo/video)
 - Caption and hashtags
 - Likes and shares count
 
-// User profile with:
+// User profile stats (still mock):
 - Stats (points, donations, level, streak)
 - Badges (achievements)
 - Donation history
 - Recent posts
 ```
 
-## Important Implementation Notes
+**What's Real vs Mock:**
+- ✅ **Real**: Crisis families, videos, images (Supabase)
+- ✅ **Real**: User authentication and profiles (Supabase)
+- ❌ **Mock**: Posts for home feed (mockData.ts)
+- ❌ **Mock**: User stats and badges (mockData.ts)
+- ❌ **Mock**: Donation tracking (mockData.ts)
+
+## Important Implementation Notes ✨ UPDATED
 
 ### Video Scroll Screen (`app/(tabs)/support.tsx`)
+- Fetches families with videos from Supabase on mount
 - Uses `FlatList` with `pagingEnabled` for vertical scroll
 - Video auto-plays when in view (tracked by index)
+- Videos stream from Supabase Storage buckets
 - Overlays for actions (share, donate, like, comment)
 - Family info at bottom with semi-transparent background
+- Loading/error/empty states for better UX
 
 ### Family Profile Screen (`app/family/[id].tsx`)
 - Accessed via dynamic route: `/family/[id]`
 - Uses `useLocalSearchParams()` to get ID
-- Finds family from mock data by ID
+- Fetches family from Supabase database by ID (not mock data)
+- Shows loading spinner while fetching
+- Error handling if family not found
 - "Donate Now" opens external URL with `Linking.openURL()`
+
+### Stories/Explore Screen (`app/(tabs)/stories.tsx`)
+- Fetches all families from Supabase on mount
+- 2-column grid layout with FlatList
+- Loading/error/empty states
+- Real-time data from database
 
 ### Navigation Flow ✨ UPDATED
 ```
@@ -434,22 +650,27 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ### Adding a New Screen
 1. Create file in appropriate location (`app/` or `app/(tabs)/`)
-2. Import and use mock data from `data/mockData.ts`
+2. Fetch data from Supabase using service layer functions (e.g., `familiesService.ts`)
 3. Follow existing screen structure (SafeAreaView, header, ScrollView)
-4. Add TypeScript types if new data structures needed
-5. Update navigation in `_layout.tsx` if adding to tabs
+4. Add loading/error/empty states for better UX
+5. Add TypeScript types if new data structures needed
+6. Update navigation in `_layout.tsx` if adding to tabs
 
-### Modifying Mock Data
-1. Edit `data/mockData.ts`
-2. Ensure TypeScript types in `types/index.ts` match
-3. Update multiple files if changing data structure (home, stories, etc.)
+### Adding Crisis Family Content
+1. **Upload media**: Upload videos/images to Supabase Storage via dashboard
+2. **Get URLs**: Copy public URLs for uploaded files
+3. **Create JSON**: Use `scripts/example-family.json` as template
+4. **Run script**: `npm run add-family your-family.json`
+5. **Verify**: Reload app and check Stories/Reels screens
+6. **See `UPLOAD_GUIDE.md` for detailed instructions**
 
-### Integrating Real Backend (Future)
-1. Create Supabase client in `lib/supabase.ts`
-2. Replace mock data imports with Supabase queries
-3. Add loading states and error handling
-4. Implement authentication flow
-5. Set up environment variables for API keys
+### Integrating Real Backend (DONE for Families) ✨
+1. ✅ Supabase client created in `lib/supabase.ts`
+2. ✅ Crisis families use Supabase queries via `familiesService.ts`
+3. ✅ Loading states and error handling implemented
+4. ✅ Authentication flow fully implemented
+5. ✅ Environment variables configured
+6. 🚧 Posts/donations still use mock data (future work)
 
 ### Styling Changes
 1. Follow existing StyleSheet patterns
@@ -457,19 +678,25 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 3. Match spacing and sizing to wireframes
 4. Test on both iOS and Android if possible
 
-## User Workflow Expectations
+## User Workflow Expectations ✨ UPDATED
+
+### Setup Flow (First Time)
+1. Run database migrations in Supabase (see `supabase/` directory)
+2. Upload videos and images to Supabase Storage
+3. Add family profiles using helper script (see `UPLOAD_GUIDE.md`)
+4. Run: `npm install` → `npm run ios`
 
 ### Testing Flow
-User will run: `npm install` → `npm run ios`
-
 The app should:
 1. Open to Sign In screen
-2. Accept any email input (no validation)
-3. Navigate to Home tab on "Continue"
-4. Allow navigation between all tabs
-5. Allow tapping family cards to view profiles
-6. Play videos in Support/Reels screen
-7. Open external links for "Donate Now" buttons
+2. Require email verification for new accounts
+3. Navigate to Home tab after verified sign-in
+4. Fetch real crisis families from Supabase
+5. Display families in Stories grid (if families exist in database)
+6. Play real videos from Supabase Storage in Support/Reels screen
+7. Allow tapping family cards to view full profiles
+8. Show loading/error states during data fetching
+9. Open external fundraising links when "Donate Now" is tapped
 
 ### Design Reference
 User has Figma wireframes showing:
@@ -525,9 +752,17 @@ Match these as closely as possible.
 
 - `SETUP.md` - Setup instructions and project overview
 - `README.md` - Mission, features, technical stack, roadmap
-- `data/mockData.ts` - All sample data
+- `UPLOAD_GUIDE.md` - Video and profile upload instructions ✨ NEW
+- `lib/familiesService.ts` - Crisis families data layer ✨ NEW
+- `supabase/crisis-families-migration.sql` - Database schema ✨ NEW
+- `supabase/storage-setup.sql` - Storage buckets setup ✨ NEW
+- `scripts/addFamily.ts` - Helper script for adding families ✨ NEW
+- `scripts/example-family.json` - Family data template ✨ NEW
+- `data/mockData.ts` - Mock data (posts, donations only - families deprecated)
 - `types/index.ts` - TypeScript definitions
 - `app/(tabs)/_layout.tsx` - Tab navigation setup
+- `lib/supabase.ts` - Supabase client configuration
+- `store/authStore.ts` - Auth state management
 
 ## Contact & Collaboration
 
@@ -540,6 +775,7 @@ This is Luke's project. Always:
 
 ---
 
-**Last Updated**: Initial creation after MVP Phase 1 completion
-**Current Version**: v1.0.0
+**Last Updated**: MVP Phase 2 - Real Content System Implementation
+**Current Version**: v2.0.0
+**Major Changes**: Crisis families now fetch from Supabase database, videos/images from Supabase Storage, helper script for adding content
 **Claude Model**: Sonnet 4.5 (claude-sonnet-4-5-20250929)

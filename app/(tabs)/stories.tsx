@@ -3,14 +3,37 @@
  * Grid view of featured crisis families with filtering
  */
 
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { mockFamilies } from '../../data/mockData';
+import { useState, useEffect } from 'react';
+import { fetchAllFamilies } from '../../lib/familiesService';
 import type { CrisisFamily } from '../../types';
 
 export default function StoriesScreen() {
   const router = useRouter();
+  const [families, setFamilies] = useState<CrisisFamily[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch families from Supabase on mount
+  useEffect(() => {
+    loadFamilies();
+  }, []);
+
+  const loadFamilies = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await fetchAllFamilies();
+      setFamilies(data);
+    } catch (err) {
+      console.error('Error loading families:', err);
+      setError('Failed to load families. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Navigate to family profile
   const handleFamilyPress = (familyId: string) => {
@@ -89,22 +112,50 @@ export default function StoriesScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Loading State */}
+      {loading && (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#0066FF" />
+          <Text style={styles.loadingText}>Loading families...</Text>
+        </View>
+      )}
+
+      {/* Error State */}
+      {error && !loading && (
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={loadFamilies}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Empty State */}
+      {!loading && !error && families.length === 0 && (
+        <View style={styles.centerContainer}>
+          <Text style={styles.emptyText}>No families yet</Text>
+          <Text style={styles.emptySubtext}>Check back soon for stories to support</Text>
+        </View>
+      )}
+
       {/* Infinite Scrolling Grid of All Families */}
-      <FlatList
-        data={mockFamilies}
-        renderItem={renderFamilyCard}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.gridContainer}
-        columnWrapperStyle={styles.columnWrapper}
-        ListHeaderComponent={ListHeaderComponent}
-        onEndReachedThreshold={0.5}
-        onEndReached={() => {
-          // This is where you would load more data in a real app
-          console.log('End of list reached - load more families');
-        }}
-      />
+      {!loading && !error && families.length > 0 && (
+        <FlatList
+          data={families}
+          renderItem={renderFamilyCard}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.gridContainer}
+          columnWrapperStyle={styles.columnWrapper}
+          ListHeaderComponent={ListHeaderComponent}
+          onEndReachedThreshold={0.5}
+          onEndReached={() => {
+            // This is where you would load more data in a real app
+            console.log('End of list reached - load more families');
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -235,5 +286,44 @@ const styles = StyleSheet.create({
   familyCardCrisis: {
     fontSize: 11,
     color: '#666',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#666',
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#d32f2f',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: '#0066FF',
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
   },
 });

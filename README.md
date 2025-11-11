@@ -33,8 +33,8 @@ CrisisApp combines storytelling, social engagement, and fundraising to amplify t
 
 ### Backend & Data ✨ LIVE
 - **Supabase Auth** - User authentication and authorization (IMPLEMENTED)
-- **Supabase PostgreSQL** - Primary database with profiles table (LIVE)
-- **Supabase Storage** - Media file hosting (configured, not yet used)
+- **Supabase PostgreSQL** - Primary database with profiles and crisis_families tables (LIVE)
+- **Supabase Storage** - Media file hosting for videos and images (LIVE)
 - **AsyncStorage** - Persistent session storage (LIVE)
 
 ### State Management ✨ LIVE
@@ -62,20 +62,29 @@ CrisisApp combines storytelling, social engagement, and fundraising to amplify t
   - Password reset flow
   - Secure session management with persistent login
   - Profile creation in PostgreSQL database
+- **Real Crisis Families Content System**
+  - PostgreSQL database table for crisis families
+  - Supabase Storage buckets for videos and images
+  - Family data service layer with TypeScript types
+  - Stories screen fetches families from database
+  - Support/Reels screen fetches families with videos
+  - Family profile screen fetches by ID from database
+  - Helper script for adding families to database
+  - Complete upload workflow documentation
 - **User interface screens**
   - Sign In/Sign Up screen with real authentication
   - Email verification screen
   - Password reset screens
   - Home dashboard (Instagram-style feed with user stats)
-  - Explore/Stories page (grid of featured families)
-  - Support/Reels screen (TikTok-style vertical video scroll)
+  - Explore/Stories page (grid of real families from database)
+  - Support/Reels screen (TikTok-style vertical video scroll with real videos)
   - Supporter profile (real user data display)
-  - Crisis family profile pages
+  - Crisis family profile pages (fetches from database)
   - Notifications screen
   - Protected tab navigation
 
 #### 🚧 In Progress (Using Mock Data)
-- Crisis family profile creation (UI complete, backend integration pending)
+- Posts/feed content (home screen uses mock data)
 - Donation tracking and point system (data structure ready)
 - User levels and badges (display logic implemented)
 - External fundraising link integration (links work, tracking pending)
@@ -196,12 +205,33 @@ CREATE TABLE profiles (
 - Tracks gamification stats (points, level, streak)
 - Avatar and bio fields for future profile customization
 
-### Family Profiles
-- Story content (text, video URLs, photo URLs)
-- Needs list
-- External fundraising links
-- Verification status
-- View/engagement metrics
+### Crisis Families Table (PostgreSQL) ✨ LIVE
+```sql
+CREATE TABLE crisis_families (
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  location TEXT NOT NULL,
+  situation TEXT NOT NULL,
+  story TEXT NOT NULL,
+  profile_image_url TEXT NOT NULL,
+  cover_image_url TEXT,
+  video_url TEXT,
+  fundraising_link TEXT NOT NULL,
+  fundraising_goal NUMERIC NOT NULL,
+  fundraising_current NUMERIC NOT NULL,
+  verified BOOLEAN DEFAULT true,
+  tags TEXT[] NOT NULL,
+  needs JSONB NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+- Stores crisis family profiles and stories
+- Links to media files in Supabase Storage
+- Includes fundraising progress and goals
+- Needs field stores structured data (icon, title, description)
+- Row Level Security (RLS) policies for access control
+- Public read access, authenticated family write access
 
 ### Engagement Tracking
 - Donation events (external confirmation)
@@ -218,19 +248,43 @@ CREATE TABLE profiles (
 
 ```
 /CrisisApp
-├── /app                    # Expo Router pages
-│   ├── (tabs)             # Tab navigation
-│   ├── (auth)             # Authentication flows
-│   └── profile/           # Profile screens
-├── /components            # Reusable UI components
-├── /hooks                 # Custom React hooks
-├── /store                 # Zustand state stores
-├── /lib                   # Utility functions and configs
-│   ├── supabase.ts       # Supabase client setup
-│   └── constants.ts      # App constants
-├── /types                 # TypeScript type definitions
-├── /assets                # Images, fonts, etc.
-└── /services              # API and external integrations
+├── /app                           # Expo Router pages
+│   ├── /(tabs)                   # Tab navigation screens
+│   │   ├── home.tsx             # Home feed
+│   │   ├── stories.tsx          # Explore/Stories (real families)
+│   │   ├── support.tsx          # Reels-style videos (real videos)
+│   │   ├── notifications.tsx    # Notifications
+│   │   └── profile.tsx          # Supporter profile
+│   ├── /family/[id].tsx         # Crisis family profile (dynamic route)
+│   ├── _layout.tsx              # Root layout (auth controller)
+│   ├── index.tsx                # Sign In/Sign Up screen
+│   ├── verify-email.tsx         # Email verification screen
+│   ├── reset-password.tsx       # Password reset request
+│   └── update-password.tsx      # New password entry
+├── /lib                           # Utility libraries
+│   ├── supabase.ts              # Supabase client configuration
+│   ├── passwordValidator.ts     # Password strength checking
+│   ├── rateLimiter.ts           # Login rate limiting logic
+│   └── familiesService.ts       # Crisis families data service
+├── /store                         # Zustand state stores
+│   └── authStore.ts             # Authentication state
+├── /data                          # Mock data
+│   └── mockData.ts              # Posts, donations (families deprecated)
+├── /types                         # TypeScript type definitions
+│   └── index.ts                 # Type definitions
+├── /supabase                      # Database migrations
+│   ├── storage-setup.sql        # Storage buckets configuration
+│   └── crisis-families-migration.sql  # Crisis families table
+├── /scripts                       # Helper scripts
+│   ├── addFamily.ts             # Add families to database
+│   ├── example-family.json      # Example family data template
+│   └── README.md                # Scripts documentation
+├── /assets                        # Images, fonts, etc.
+├── README.md                      # Project documentation
+├── SETUP.md                       # Setup and run instructions
+├── UPLOAD_GUIDE.md                # Video & profile upload guide
+├── CLAUDE.md                      # Claude Code context
+└── AUTH_TESTING.md                # Authentication testing guide
 ```
 
 ## Development Setup
@@ -281,12 +335,30 @@ npx expo start --android
 
 ## Security & Privacy Considerations
 
-- Secure authentication via Supabase Auth
-- Row-level security policies in PostgreSQL
-- Sensitive data encrypted at rest
-- HTTPS for all network communications
-- Privacy controls for user data
-- Compliance with fundraising regulations (delegated to external platforms)
+### Authentication Security
+- **Supabase Auth** - Industry-standard authentication with JWT tokens
+- **Password Requirements** - Enforced strong passwords:
+  - Minimum 8 characters
+  - Must include uppercase, lowercase, numbers, special characters
+  - Protection against common passwords (top 100 blocked)
+- **Rate Limiting** - Client-side protection against brute force:
+  - Maximum 5 failed login attempts
+  - 15-minute lockout after threshold exceeded
+  - Automatic reset after successful login
+- **Email Verification** - Required for all new accounts
+- **Session Security** - Persistent sessions with automatic token refresh
+
+### Data Security
+- **Row Level Security (RLS)** - PostgreSQL policies on all tables
+- **Encrypted storage** - Sensitive data encrypted at rest
+- **HTTPS only** - All network communications secured
+- **Secure session storage** - AsyncStorage with device-level encryption
+- **Privacy controls** - User data access controls
+
+### Compliance
+- Fundraising regulations delegated to external platforms (GoFundMe, etc.)
+- Clear data privacy policies (to be implemented)
+- User content moderation systems (manual review)
 
 ## Success Metrics
 

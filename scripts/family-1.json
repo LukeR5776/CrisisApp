@@ -1,0 +1,34 @@
+{
+  "name": "The Millican Family",
+  "location": "Chickamauga, Georgia",
+  "situation": "Tragic House Fire",
+  "story": "tragedy struck the Millican family when a devastating house fire swept through their home in Chickamauga, Georgia.\n\nJohn Millican III, a beloved teacher and coach at LaFayette High School, tragically lost his life after being trapped inside the home. His wife, Heather Millican, a dedicated social studies teacher at LaFayette Middle School, and their two young sons, Noah (8) and Elijah (3), suffered serious burn injuries and are currently receiving treatment at Vanderbilt Burn Center in Nashville.\n\nThe Millicans are deeply woven into the Walker County school community; both John and Heather have touched countless lives through their work as educators and mentors. Their dedication to their students, schools, and neighbors has made them pillars of compassion and service in LaFayette and Chickamauga.\n\nNow, the community has an opportunity to give back.\n\nEven if insurance eventually covers portions of their loss, the financial and emotional toll of rebuilding their lives will be immense. The family has lost not only their home and possessions but also their husband and father. Heather, Noah, and Elijah face a long road of medical treatment and rehabilitation, followed by the challenge of starting over while grieving an unimaginable loss.",
+  "profile_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family1profile.jpg",
+  "cover_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family1image.webp",
+  "video_url": "",
+  "fundraising_link": "https://gofund.me/32131f208",
+  "fundraising_goal": 150000,
+  "fundraising_current": 14850,
+  "verified": true,
+  "tags": ["#Georgia", "#HouseFire", "#Loss"],
+  "needs": [
+    {
+      "id": "1",
+      "icon": "🏥",
+      "title": "Medical Expenses",
+      "description": "Medical bills and treatment for burn injuries"
+    },
+    {
+      "id": "2",
+      "icon": "🏠",
+      "title": "Home Rebuilding",
+      "description": "Rebuilding the family home"
+    },
+    {
+      "id": "3",
+      "icon": "👦",
+      "title": "Supporting Children",
+      "description": "Supporting the children through the loss of their father"
+    }
+  ]
+}

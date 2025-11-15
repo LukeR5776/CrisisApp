@@ -9,7 +9,11 @@ Provide a platform for crisis families to share their stories and receive direct
 
 ## Current Status: MVP Phase 2 - Real Content System Complete & Operational
 
-All core screens have been built and are interactive. **Real authentication AND real crisis family content via Supabase is now fully implemented and operational.** The app uses real data for both auth and family profiles. **Database now contains 1 family (The Millican Family from Georgia) with real media from Supabase Storage.** Ready for demo on iOS/Android simulators.
+All core screens have been built and are interactive. **Real authentication AND real crisis family content via Supabase is now fully implemented and operational.** The app uses real data for both auth and family profiles. **Database now contains 2 families with real media from Supabase Storage.** Ready for demo on iOS/Android simulators.
+
+### Current Database Content
+- **Family 1**: The Millican Family (Chickamauga, GA) - House fire recovery
+- **Family 2**: The Hewitt Family (Trelawny, Jamaica) - Hurricane Melissa farm damage
 
 ### Completed Features ✅
 - **Real Supabase Authentication System** ✅
@@ -21,15 +25,17 @@ All core screens have been built and are interactive. **Real authentication AND 
   - Profile creation and management in PostgreSQL
   - Zustand state management for auth state
 - **Real Crisis Families Content System** ✨ OPERATIONAL
-  - PostgreSQL database table for crisis families (LIVE with 1 family)
+  - PostgreSQL database table for crisis families (LIVE with 2 families)
   - Supabase Storage buckets for videos and images (LIVE)
   - Family data service layer with TypeScript types
   - Stories screen fetches families from database
   - Support/Reels screen fetches families with videos
-  - Family profile screen fetches by ID from database
+  - Family profile screen fetches by ID from database with expandable story
   - Helper script for adding families to database
   - Complete upload workflow documentation
-  - **First family imported**: The Millican Family (Chickamauga, GA)
+  - **Imported families**:
+    - The Millican Family (Chickamauga, GA) - ID: c53bded3-976d-4f03-beee-001fb1057a19
+    - The Hewitt Family (Trelawny, Jamaica) - ID: e35506e3-0e99-40d0-8d66-326914817bab
 - Sign In/Sign Up screen (real authentication + OAuth placeholders)
 - Email verification screen with status checking
 - Password reset and update screens
@@ -397,37 +403,77 @@ Provides type-safe functions for fetching family data:
 - Displays full profile with story, needs, fundraising progress
 - "Donate Now" opens external fundraising link
 
-### Content Upload Workflow
+### Content Upload Workflow (How to Add More Families)
 
-**For demo/testing purposes**, families are added manually via:
+**Complete process for adding families to the database:**
 
-1. **Upload media to Supabase Storage** (via dashboard):
-   - Navigate to Storage in Supabase dashboard
-   - Upload videos to `family-videos` bucket
-   - Upload images to `family-images` bucket
-   - Copy public URLs for each file
+#### Prerequisites Setup (One-time)
+1. **Database Setup** (COMPLETED):
+   - ✅ crisis_families table exists in Supabase PostgreSQL
+   - ✅ Storage buckets (family-videos, family-images) exist
+   - ✅ RLS policy added: "Allow inserts for development" (permits anon inserts)
 
-2. **Create family data JSON**:
-   - Use `scripts/example-family.json` as template
-   - Fill in family details with Storage URLs
-   - Include fundraising links (can be placeholder)
+2. **Environment Variables** (Required for script):
+   - Supabase URL: https://zlthbhzfnozzrkvjxxuz.supabase.co
+   - Anon Key: (stored in lib/supabase.ts)
 
-3. **Run helper script**:
-   ```bash
-   npm run add-family my-family.json
-   ```
-   or
-   ```bash
-   npx ts-node scripts/addFamily.ts my-family.json
-   ```
+#### Import Workflow (Repeat for each family)
 
-4. **Verify in app**:
-   - Reload app
-   - Check Stories grid for new family
-   - View video in Support/Reels
-   - Tap to view full profile
+**Step 1: Upload Media to Supabase Storage**
+1. Go to Supabase dashboard → Storage
+2. Upload profile image to `family-images` bucket (required)
+3. Upload cover image to `family-images` bucket (optional)
+4. Upload video to `family-videos` bucket (optional)
+5. Copy public URLs for all uploaded files
 
-**See `UPLOAD_GUIDE.md` for complete step-by-step instructions.**
+**Step 2: Create Family JSON**
+1. Copy `scripts/example-family.json` or `scripts/family-1.json` as template
+2. Create new file: `scripts/family-N.json` (where N = next number)
+3. Fill in all fields:
+   - name, location, situation, story (required)
+   - profile_image_url (required - from Supabase Storage)
+   - cover_image_url, video_url (optional - from Supabase Storage or empty string)
+   - fundraising_link, fundraising_goal, fundraising_current (required)
+   - verified: true/false
+   - tags: array of hashtags
+   - needs: array of need objects (id, icon, title, description)
+
+**Step 3: Run Import Script**
+```bash
+EXPO_PUBLIC_SUPABASE_URL="https://zlthbhzfnozzrkvjxxuz.supabase.co" \
+EXPO_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpsdGhiaHpmbm96enJrdmp4eHV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzMjM5MTMsImV4cCI6MjA3Njg5OTkxM30.63gt13cF4FaBjF_Jri9sniFjSfUKGkuozunkJf_U5I8" \
+npx ts-node scripts/addFamily.ts scripts/family-N.json
+```
+
+**Expected Output:**
+```
+✅ Family added successfully!
+   ID: [uuid]
+   Name: [Family Name]
+   Location: [Location]
+   Fundraising: $X / $Y
+   ...
+```
+
+**Step 4: Verify in App**
+1. Reload app (Metro should auto-reload)
+2. Check Stories grid - new family should appear
+3. Tap family card to view profile
+4. If family has video, check Support/Reels tab
+
+**Step 5: Update Documentation & Commit**
+1. Update CLAUDE.md "Current Database Content" section with new family
+2. Update README.md family count
+3. Commit family-N.json and documentation updates
+4. Push to GitHub
+
+**See `UPLOAD_GUIDE.md` for detailed step-by-step instructions.**
+
+#### Troubleshooting
+- **"Table not found" error**: Supabase API schema cache needs reload (Settings → API → Reload schema)
+- **"RLS policy violation" error**: Run SQL to add permissive policy (see setup notes)
+- **Images not loading**: Verify bucket is public and URLs are correct
+- **Video not playing**: Check format (MP4 H.264) and file size (<50MB)
 
 ### Helper Script (`scripts/addFamily.ts`)
 
@@ -776,7 +822,12 @@ This is Luke's project. Always:
 
 ---
 
-**Last Updated**: MVP Phase 2 - First Family Data Import Complete
-**Current Version**: v2.1.0
-**Major Changes**: First crisis family successfully imported to database (The Millican Family), system now operational with real content from Supabase Storage
+**Last Updated**: MVP Phase 2 - Two Families Imported, Comprehensive Workflow Documentation
+**Current Version**: v2.2.0
+**Major Changes**:
+- Second family imported (The Hewitt Family from Jamaica)
+- Comprehensive import workflow documentation added
+- Family profile improvements (expandable stories, real situation data)
+- Complete troubleshooting guide for future imports
+**Database Status**: 2 families operational with real Supabase Storage media
 **Claude Model**: Sonnet 4.5 (claude-sonnet-4-5-20250929)

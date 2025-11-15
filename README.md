@@ -63,15 +63,17 @@ CrisisApp combines storytelling, social engagement, and fundraising to amplify t
   - Secure session management with persistent login
   - Profile creation in PostgreSQL database
 - **Real Crisis Families Content System** ✨ OPERATIONAL
-  - PostgreSQL database table for crisis families (1 family imported)
+  - PostgreSQL database table for crisis families (2 families imported)
   - Supabase Storage buckets for videos and images (LIVE)
   - Family data service layer with TypeScript types
   - Stories screen fetches families from database
   - Support/Reels screen fetches families with videos
-  - Family profile screen fetches by ID from database
+  - Family profile screen with expandable stories
   - Helper script for adding families to database
   - Complete upload workflow documentation
-  - **Database now contains real family data** (The Millican Family)
+  - **Database contains real family data**:
+    - The Millican Family (Chickamauga, GA)
+    - The Hewitt Family (Trelawny, Jamaica)
 - **User interface screens**
   - Sign In/Sign Up screen with real authentication
   - Email verification screen

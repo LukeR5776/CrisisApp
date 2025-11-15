@@ -1,0 +1,34 @@
+{
+  "name": "The Hewitt Family",
+  "location": "Trelawny, Jamaica",
+  "situation": "Family farm desecrated by Hurricane Melissa.",
+  "story": "Hello everyone, I'm Taj Hewitt, a senior at NC State University. My father is a farmer in Trelawny, Jamaica, where the farm I grew up on has been devastated by the Category 5 Hurricane, Melissa.\n\nCreating this page hasn't been easy; so many families across the island are hurting right now, and I hesitated to ask for help. But as the days go by, my parents are struggling to recover. Our family farm is our main source of income, and without it, even basic necessities like food and clean water are becoming hard to come by.\n\nAgriculture in Jamaica often doesn't receive the same level of support as other industries, so we don't know when - or if - help will arrive. That's why I'm turning to this community for support.\n\nWe're not asking for much - just enough to get back on our feet and start growing food for our family and community once more.\n\nAny contribution, no matter how small, would be a great blessing to us. Your support will help bring life back to a place that has fed and sustained our family.",
+  "profile_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family2profile.webp",
+  "cover_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family2image.webp",
+  "video_url": "",
+  "fundraising_link": "https://gofund.me/d43e74dd6",
+  "fundraising_goal": 6000,
+  "fundraising_current": 6540,
+  "verified": true,
+  "tags": ["#HurricaneMelissa", "#Jamaica", "#Agriculture"],
+  "needs": [
+    {
+      "id": "1",
+      "icon": "🌾",
+      "title": "Farm Rebuilding",
+      "description": "Rebuilding our greenhouse and planting areas."
+    },
+    {
+      "id": "2",
+      "icon": "🌱",
+      "title": "Materials and Supplies",
+      "description": "Purchasing seeds, fertilizer, and irrigation supplies."
+    },
+    {
+      "id": "3",
+      "icon": "🔧",
+      "title": "Repairing Equipment",
+      "description": "Restoring essential farm equipment needed to get production going again."
+    }
+  ]
+}

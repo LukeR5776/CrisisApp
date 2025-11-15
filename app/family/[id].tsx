@@ -16,6 +16,7 @@ export default function FamilyProfileScreen() {
   const [family, setFamily] = useState<CrisisFamily | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [storyExpanded, setStoryExpanded] = useState(false);
 
   // Fetch family from Supabase when ID changes
   useEffect(() => {
@@ -117,21 +118,20 @@ export default function FamilyProfileScreen() {
 
         {/* Journey Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Journey of {family.name}</Text>
-          <Text style={styles.familyStory}>{family.story}</Text>
-        </View>
-
-        {/* Family Story (Extended) */}
-        <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>Family Story</Text>
-            <TouchableOpacity>
-              <Text style={styles.readMore}>Read More ›</Text>
-            </TouchableOpacity>
+            <Text style={styles.sectionTitle}>Journey of {family.name}</Text>
+            {family.story.length > 150 && (
+              <TouchableOpacity onPress={() => setStoryExpanded(!storyExpanded)}>
+                <Text style={styles.readMore}>
+                  {storyExpanded ? 'Read less ‹' : 'Read more ›'}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
-          <Text style={styles.storyTitle}>Our Journey</Text>
-          <Text style={styles.storyText}>
-            {family.story} We are grateful for any support as we navigate this difficult time and work towards rebuilding our lives.
+          <Text style={styles.familyStory}>
+            {storyExpanded || family.story.length <= 150
+              ? family.story
+              : `${family.story.substring(0, 150)}...`}
           </Text>
         </View>
 
@@ -139,7 +139,7 @@ export default function FamilyProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Situation Overview</Text>
           <Text style={styles.situationText}>
-            Living in a refugee camp with limited access to food, water, and medical care.
+            {family.situation}
           </Text>
         </View>
 

@@ -5,7 +5,10 @@
   "story": "We fled our home in Aleppo in 2016 when the bombings intensified. Now living in a refugee camp with limited resources, we dream of rebuilding our lives and providing education for our children. Your support means everything to us as we work towards a better future.",
   "profile_image_url": "https://your-supabase-url/storage/v1/object/public/family-images/johnson-profile.jpg",
   "cover_image_url": "https://your-supabase-url/storage/v1/object/public/family-images/johnson-cover.jpg",
-  "video_url": "https://your-supabase-url/storage/v1/object/public/family-videos/johnson-story.mp4",
+  "video_url": [
+    "https://your-supabase-url/storage/v1/object/public/family-videos/johnson-story-1.mp4",
+    "https://your-supabase-url/storage/v1/object/public/family-videos/johnson-story-2.mp4"
+  ],
   "fundraising_link": "https://gofundme.com/johnson-family",
   "fundraising_goal": 15000,
   "fundraising_current": 5800,

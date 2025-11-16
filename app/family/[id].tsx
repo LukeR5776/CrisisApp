@@ -135,6 +135,36 @@ export default function FamilyProfileScreen() {
           </Text>
         </View>
 
+        {/* Video Gallery - only show if family has videos */}
+        {family.videoUrl && family.videoUrl.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>
+              Video Stories ({family.videoUrl.length})
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.videoGallery}
+            >
+              {family.videoUrl.map((videoUrl, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.videoThumbnail}
+                  onPress={() => {
+                    // TODO: Future - open video in modal or navigate to Support screen
+                    console.log('Play video:', videoUrl);
+                  }}
+                >
+                  <View style={styles.videoThumbnailOverlay}>
+                    <Text style={styles.playIcon}>▶</Text>
+                  </View>
+                  <Text style={styles.videoNumber}>Video {index + 1}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         {/* Situation Overview */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Situation Overview</Text>
@@ -434,5 +464,42 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  videoGallery: {
+    paddingVertical: 8,
+    gap: 12,
+  },
+  videoThumbnail: {
+    width: 160,
+    height: 90,
+    borderRadius: 8,
+    backgroundColor: '#e0e0e0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  videoThumbnailOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  playIcon: {
+    fontSize: 32,
+    color: '#fff',
+  },
+  videoNumber: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#fff',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
 });

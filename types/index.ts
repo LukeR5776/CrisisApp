@@ -10,7 +10,7 @@ export interface CrisisFamily {
   story: string;
   profileImage: string;
   coverImage?: string;
-  videoUrl?: string;
+  videoUrl?: string[]; // Array of video URLs - supports multiple videos per family
   fundraisingLink: string;
   fundraisingGoal: number;
   fundraisingCurrent: number;

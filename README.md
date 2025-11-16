@@ -218,7 +218,7 @@ CREATE TABLE crisis_families (
   story TEXT NOT NULL,
   profile_image_url TEXT NOT NULL,
   cover_image_url TEXT,
-  video_url TEXT,
+  video_url TEXT[],
   fundraising_link TEXT NOT NULL,
   fundraising_goal NUMERIC NOT NULL,
   fundraising_current NUMERIC NOT NULL,
@@ -231,6 +231,7 @@ CREATE TABLE crisis_families (
 ```
 - Stores crisis family profiles and stories
 - Links to media files in Supabase Storage
+- **Supports multiple videos per family** (video_url is an array)
 - Includes fundraising progress and goals
 - Needs field stores structured data (icon, title, description)
 - Row Level Security (RLS) policies for access control

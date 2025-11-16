@@ -12,9 +12,24 @@ import type { CrisisFamily } from '../../types';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+/**
+ * Individual video item with family metadata
+ * Supports multiple videos per family by flattening the array
+ */
+interface VideoItem {
+  id: string;
+  url: string;
+  familyId: string;
+  familyName: string;
+  familyLocation: string;
+  familyStory: string;
+  familyTags: string[];
+  profileImage: string;
+}
+
 export default function SupportScreen() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [videoPosts, setVideoPosts] = useState<CrisisFamily[]>([]);
+  const [videoPosts, setVideoPosts] = useState<VideoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +43,23 @@ export default function SupportScreen() {
       setLoading(true);
       setError(null);
       const data = await fetchFamiliesWithVideos();
-      setVideoPosts(data);
+
+      // Flatten video arrays - each family can have multiple videos
+      // Transform into individual video items with family metadata
+      const allVideos: VideoItem[] = data.flatMap(family =>
+        (family.videoUrl || []).map((url, index) => ({
+          id: `${family.id}-${index}`,
+          url,
+          familyId: family.id,
+          familyName: family.name,
+          familyLocation: family.location,
+          familyStory: family.story,
+          familyTags: family.tags,
+          profileImage: family.profileImage,
+        }))
+      );
+
+      setVideoPosts(allVideos);
     } catch (err) {
       console.error('Error loading videos:', err);
       setError('Failed to load videos. Please try again.');
@@ -45,16 +76,16 @@ export default function SupportScreen() {
   };
 
   // Render each video post
-  const renderVideoPost = ({ item, index }: { item: typeof videoPosts[0]; index: number }) => {
+  const renderVideoPost = ({ item, index }: { item: VideoItem; index: number }) => {
     const isActive = index === activeIndex;
 
     return (
       <View style={styles.videoContainer}>
         {/* Video Player */}
         <View style={styles.videoWrapper}>
-          {item.videoUrl ? (
+          {item.url ? (
             <Video
-              source={{ uri: item.videoUrl }}
+              source={{ uri: item.url }}
               style={styles.video}
               resizeMode={ResizeMode.COVER}
               shouldPlay={isActive}
@@ -108,13 +139,13 @@ export default function SupportScreen() {
 
         {/* Bottom Info */}
         <View style={styles.bottomInfo}>
-          <Text style={styles.familyName}>{item.name}</Text>
-          <Text style={styles.familyLocation}>{item.location}</Text>
+          <Text style={styles.familyName}>{item.familyName}</Text>
+          <Text style={styles.familyLocation}>{item.familyLocation}</Text>
           <Text style={styles.familyStory} numberOfLines={2}>
-            {item.story}
+            {item.familyStory}
           </Text>
           <View style={styles.hashtags}>
-            {item.tags.map((tag, i) => (
+            {item.familyTags.map((tag, i) => (
               <Text key={i} style={styles.hashtag}>{tag}</Text>
             ))}
           </View>

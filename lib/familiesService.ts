@@ -19,7 +19,7 @@ interface CrisisFamilyRow {
   story: string;
   profile_image_url: string;
   cover_image_url: string | null;
-  video_url: string | null;
+  video_url: string[] | null; // Array of video URLs
   fundraising_link: string;
   fundraising_goal: number;
   fundraising_current: number;
@@ -42,7 +42,7 @@ function transformDbRowToFamily(row: CrisisFamilyRow): CrisisFamily {
     story: row.story,
     profileImage: row.profile_image_url,
     coverImage: row.cover_image_url || undefined,
-    videoUrl: row.video_url || undefined,
+    videoUrl: row.video_url && row.video_url.length > 0 ? row.video_url : undefined,
     fundraisingLink: row.fundraising_link,
     fundraisingGoal: Number(row.fundraising_goal),
     fundraisingCurrent: Number(row.fundraising_current),
@@ -174,7 +174,10 @@ export async function fetchFamiliesWithVideos(options?: {
       return [];
     }
 
-    return data.map(transformDbRowToFamily);
+    // Filter out families with empty video arrays and transform
+    return data
+      .filter((row) => row.video_url && Array.isArray(row.video_url) && row.video_url.length > 0)
+      .map(transformDbRowToFamily);
   } catch (error) {
     console.error('Error in fetchFamiliesWithVideos:', error);
     throw error;

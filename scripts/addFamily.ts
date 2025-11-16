@@ -41,7 +41,7 @@ interface FamilyInput {
   story: string;
   profile_image_url: string;
   cover_image_url?: string;
-  video_url?: string;
+  video_url?: string | string[]; // Accept both single string (legacy) and array
   fundraising_link: string;
   fundraising_goal: number;
   fundraising_current: number;
@@ -106,6 +106,19 @@ async function addFamily(familyData: FamilyInput) {
     console.log(`   Name: ${familyData.name}`);
     console.log(`   Location: ${familyData.location}`);
 
+    // Normalize video_url to array format
+    let videoUrlArray: string[] | null = null;
+    if (familyData.video_url) {
+      if (typeof familyData.video_url === 'string') {
+        // Legacy single string format - convert to array
+        videoUrlArray = familyData.video_url.trim() === '' ? null : [familyData.video_url];
+      } else if (Array.isArray(familyData.video_url)) {
+        // Already an array - filter out empty strings
+        const filtered = familyData.video_url.filter(url => url && url.trim() !== '');
+        videoUrlArray = filtered.length > 0 ? filtered : null;
+      }
+    }
+
     const { data, error } = await supabase
       .from('crisis_families')
       .insert([
@@ -116,7 +129,7 @@ async function addFamily(familyData: FamilyInput) {
           story: familyData.story,
           profile_image_url: familyData.profile_image_url,
           cover_image_url: familyData.cover_image_url || null,
-          video_url: familyData.video_url || null,
+          video_url: videoUrlArray,
           fundraising_link: familyData.fundraising_link,
           fundraising_goal: familyData.fundraising_goal,
           fundraising_current: familyData.fundraising_current,
@@ -137,8 +150,11 @@ async function addFamily(familyData: FamilyInput) {
     console.log(`   ID: ${data.id}`);
     console.log(`   Name: ${data.name}`);
     console.log(`   Location: ${data.location}`);
-    if (data.video_url) {
-      console.log(`   Video: ${data.video_url}`);
+    if (data.video_url && Array.isArray(data.video_url) && data.video_url.length > 0) {
+      console.log(`   Videos: ${data.video_url.length} video(s)`);
+      data.video_url.forEach((url, index) => {
+        console.log(`      ${index + 1}. ${url}`);
+      });
     }
     console.log(`   Fundraising: $${data.fundraising_current} / $${data.fundraising_goal}`);
     console.log(`   Profile: ${data.profile_image_url}`);

@@ -307,7 +307,7 @@ All core screens have been built and are interactive. **Real authentication AND 
 - story: text (full story, 2-3 paragraphs)
 - profile_image_url: text (square profile photo from Storage)
 - cover_image_url: text (landscape cover photo from Storage, nullable)
-- video_url: text (video story from Storage, nullable)
+- video_url: text[] (array of video URLs from Storage, nullable) ✨ SUPPORTS MULTIPLE VIDEOS
 - fundraising_link: text (external GoFundMe/etc. link)
 - fundraising_goal: numeric (target amount in USD)
 - fundraising_current: numeric (amount raised so far)
@@ -358,10 +358,11 @@ Provides type-safe functions for fetching family data:
 - Used by: Family profile screen
 
 #### `fetchFamiliesWithVideos(options?)`
-- Fetches only families that have video_url
+- Fetches only families that have video_url array with at least one video
+- Filters out families with empty video arrays
 - Optional limit parameter
 - Returns: `Promise<CrisisFamily[]>`
-- Used by: Support/Reels screen
+- Used by: Support/Reels screen (flattens videos for TikTok-style scrolling)
 
 #### `searchFamilies(searchTerm)`
 - Search families by name, location, or tags
@@ -391,16 +392,20 @@ Provides type-safe functions for fetching family data:
 
 #### Support/Reels Screen (`app/(tabs)/support.tsx`)
 - Fetches families with videos using `fetchFamiliesWithVideos()`
+- **Flattens video arrays** - each family's multiple videos become individual items
+- Creates `VideoItem` objects with video URL + family metadata
 - Displays in vertical scroll with video auto-play
 - Loading/error/empty states
 - Videos stream from Supabase Storage
-- Full-screen TikTok/Reels style
+- Full-screen TikTok/Reels style (all videos from all families in one scroll)
 
 #### Family Profile Screen (`app/family/[id].tsx`)
 - Fetches single family by ID using `fetchFamilyById()`
 - Shows loading spinner while fetching
 - Error state if family not found
 - Displays full profile with story, needs, fundraising progress
+- **Video gallery section** - horizontal scroll of video thumbnails (if family has videos)
+- Expandable story with "Read more" toggle
 - "Donate Now" opens external fundraising link
 
 ### Content Upload Workflow (How to Add More Families)
@@ -432,7 +437,8 @@ Provides type-safe functions for fetching family data:
 3. Fill in all fields:
    - name, location, situation, story (required)
    - profile_image_url (required - from Supabase Storage)
-   - cover_image_url, video_url (optional - from Supabase Storage or empty string)
+   - cover_image_url (optional - from Supabase Storage or omit)
+   - **video_url (optional - array of video URLs or empty array [])**
    - fundraising_link, fundraising_goal, fundraising_current (required)
    - verified: true/false
    - tags: array of hashtags
@@ -822,11 +828,14 @@ This is Luke's project. Always:
 
 ---
 
-**Last Updated**: MVP Phase 2 - Two Families Imported, Comprehensive Workflow Documentation
-**Current Version**: v2.2.0
+**Last Updated**: MVP Phase 2 - Multiple Videos Per Family Feature
+**Current Version**: v2.3.0
 **Major Changes**:
-- Second family imported (The Hewitt Family from Jamaica)
-- Comprehensive import workflow documentation added
+- Implemented multiple videos per family (video_url migrated from TEXT to TEXT[])
+- Support/Reels screen flattens video arrays for TikTok-style scrolling
+- Family profile screen displays video gallery with horizontal scroll
+- Updated all JSON templates and existing families to use array format
+- Backward-compatible import script handles both string and array formats
 - Family profile improvements (expandable stories, real situation data)
 - Complete troubleshooting guide for future imports
 **Database Status**: 2 families operational with real Supabase Storage media

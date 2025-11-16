@@ -152,7 +152,7 @@ async function addFamily(familyData: FamilyInput) {
     console.log(`   Location: ${data.location}`);
     if (data.video_url && Array.isArray(data.video_url) && data.video_url.length > 0) {
       console.log(`   Videos: ${data.video_url.length} video(s)`);
-      data.video_url.forEach((url, index) => {
+      data.video_url.forEach((url: string, index: number) => {
         console.log(`      ${index + 1}. ${url}`);
       });
     }

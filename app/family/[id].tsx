@@ -3,10 +3,11 @@
  * Detailed profile of a crisis family with their story, needs, and fundraising info
  */
 
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Linking, ActivityIndicator, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Video, ResizeMode } from 'expo-av';
 import { fetchFamilyById } from '../../lib/familiesService';
 import type { CrisisFamily } from '../../types';
 
@@ -17,6 +18,8 @@ export default function FamilyProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [storyExpanded, setStoryExpanded] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const videoRef = useRef<Video>(null);
 
   // Fetch family from Supabase when ID changes
   useEffect(() => {
@@ -150,15 +153,27 @@ export default function FamilyProfileScreen() {
                 <TouchableOpacity
                   key={index}
                   style={styles.videoThumbnail}
-                  onPress={() => {
-                    // TODO: Future - open video in modal or navigate to Support screen
-                    console.log('Play video:', videoUrl);
-                  }}
+                  onPress={() => setSelectedVideo(videoUrl)}
+                  activeOpacity={0.9}
                 >
-                  <View style={styles.videoThumbnailOverlay}>
+                  {/* Video component with poster as thumbnail */}
+                  <Video
+                    source={{ uri: videoUrl }}
+                    style={styles.videoPreview}
+                    resizeMode={ResizeMode.COVER}
+                    shouldPlay={false}
+                    isMuted={true}
+                  />
+
+                  {/* Play icon overlay */}
+                  <View style={styles.playOverlay}>
                     <Text style={styles.playIcon}>▶</Text>
                   </View>
-                  <Text style={styles.videoNumber}>Video {index + 1}</Text>
+
+                  {/* Video number badge */}
+                  <View style={styles.videoBadge}>
+                    <Text style={styles.videoBadgeText}>Video {index + 1}</Text>
+                  </View>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -230,6 +245,41 @@ export default function FamilyProfileScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Video Player Modal */}
+      <Modal
+        visible={selectedVideo !== null}
+        animationType="fade"
+        transparent={false}
+        onRequestClose={() => {
+          setSelectedVideo(null);
+          videoRef.current?.pauseAsync();
+        }}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => {
+                setSelectedVideo(null);
+                videoRef.current?.pauseAsync();
+              }}
+            >
+              <Text style={styles.closeButtonText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Video
+            ref={videoRef}
+            source={{ uri: selectedVideo || '' }}
+            style={styles.fullscreenVideo}
+            resizeMode={ResizeMode.CONTAIN}
+            shouldPlay={true}
+            isLooping={false}
+            useNativeControls={true}
+          />
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -466,40 +516,80 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   videoGallery: {
-    paddingVertical: 8,
-    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    gap: 10,
   },
   videoThumbnail: {
-    width: 160,
-    height: 90,
-    borderRadius: 8,
-    backgroundColor: '#e0e0e0',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 120,
+    height: 213, // 9:16 portrait aspect ratio (120 × 1.775)
+    borderRadius: 12,
     overflow: 'hidden',
+    position: 'relative',
+    backgroundColor: '#000',
   },
-  videoThumbnailOverlay: {
-    position: 'absolute',
+  videoPreview: {
     width: '100%',
     height: '100%',
+  },
+  playOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   playIcon: {
-    fontSize: 32,
+    fontSize: 40,
     color: '#fff',
   },
-  videoNumber: {
+  videoBadge: {
     position: 'absolute',
-    bottom: 8,
-    left: 8,
-    fontSize: 10,
-    fontWeight: '600',
+    bottom: 10,
+    left: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  videoBadgeText: {
     color: '#fff',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  modalHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    fontSize: 24,
+    color: '#fff',
+    fontWeight: '300',
+  },
+  fullscreenVideo: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
   },
 });

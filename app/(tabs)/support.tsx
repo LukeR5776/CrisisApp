@@ -7,6 +7,7 @@ import { View, Text, Dimensions, StyleSheet, TouchableOpacity, FlatList, Activit
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Video, ResizeMode } from 'expo-av';
 import { useState, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { fetchFamiliesWithVideos } from '../../lib/familiesService';
 import type { CrisisFamily } from '../../types';
 
@@ -32,6 +33,15 @@ export default function SupportScreen() {
   const [videoPosts, setVideoPosts] = useState<VideoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isScreenFocused, setIsScreenFocused] = useState(true);
+
+  // Pause videos when navigating away from this tab
+  useFocusEffect(() => {
+    setIsScreenFocused(true);
+    return () => {
+      setIsScreenFocused(false);
+    };
+  });
 
   // Fetch families with videos from Supabase on mount
   useEffect(() => {
@@ -88,7 +98,7 @@ export default function SupportScreen() {
               source={{ uri: item.url }}
               style={styles.video}
               resizeMode={ResizeMode.COVER}
-              shouldPlay={isActive}
+              shouldPlay={isActive && isScreenFocused}
               isLooping
               isMuted={false}
             />

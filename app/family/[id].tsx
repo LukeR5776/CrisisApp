@@ -256,18 +256,19 @@ export default function FamilyProfileScreen() {
           videoRef.current?.pauseAsync();
         }}
       >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
+        <View style={styles.modalContainer}>
+          <SafeAreaView style={styles.modalSafeArea}>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => {
                 setSelectedVideo(null);
                 videoRef.current?.pauseAsync();
               }}
+              activeOpacity={0.7}
             >
               <Text style={styles.closeButtonText}>✕</Text>
             </TouchableOpacity>
-          </View>
+          </SafeAreaView>
 
           <Video
             ref={videoRef}
@@ -278,7 +279,7 @@ export default function FamilyProfileScreen() {
             isLooping={false}
             useNativeControls={true}
           />
-        </SafeAreaView>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -564,23 +565,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
-  modalHeader: {
+  modalSafeArea: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 10,
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    zIndex: 100,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    alignItems: 'flex-end',
   },
   closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   closeButtonText: {
     fontSize: 24,

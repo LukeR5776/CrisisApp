@@ -1,0 +1,27 @@
+# CrisisApp Coding Log
+
+## November 17, 2025 - Family Profile Import Milestone: Reaching Demo-Ready Status
+
+**Goal:** Successfully import multiple family profiles with videos to reach a demo-ready count for the application.
+
+**What Was Learned:**
+This session revealed the importance of robust data validation and error handling in the import process. Working with the TypeScript-based import script (`addFamily.ts`) highlighted how proper type checking catches issues early - we discovered JSON syntax errors (trailing commas) that would have caused runtime failures. The session also demonstrated the power of the multiple videos per family feature we implemented earlier: families like The Hatem Family with 2 videos and Cortney Lane with 3 videos showcase how the flattened video array system enables rich storytelling. Additionally, learned that the backward-compatible import script handles both legacy string format and new array format seamlessly, making it easier to migrate existing data. Database-level validation through the needs array structure and required fields ensures data integrity at every step.
+
+**What Was Created/Worked On:**
+Successfully imported 5 diverse family profiles into the Supabase database, bringing the total to 7 crisis families. Each import included profile images, cover images, and video content stored in Supabase Storage. The families added were: (3) Mohammed and Omar from Gaza - war zone survival with 1 video, (4) The Zyad Family from Gaza - family with baby Ayla and 1 video, (5) The Hatem Family from Gaza - "Gym Rat" influencer story with 2 videos (first multi-video family), (6) Cortney Lane from Miami - homelessness documentation with 3 videos, and (7) Marcus Johnson from Portland - youth aging out of foster care with 2 videos. Also fixed a TypeScript compilation error in the import script by adding proper type annotations to forEach callback parameters. Each family represents different crisis scenarios (war, natural disaster, homelessness, youth crisis), providing diverse content for the app's Stories and Support/Reels screens.
+
+**Next Goal:** Add families from different geographic regions and crisis types to increase representation diversity and content variety.
+
+---
+
+## November 17, 2025 - Complete Video Display & Playback System Implementation
+
+**Goal:** Transform the placeholder video gallery on family profiles into a fully functional Instagram-style portrait thumbnail gallery with modal video playback.
+
+**What Was Learned:**
+This session provided deep insights into mobile video UX patterns and React Native video handling. Learned that expo-av's Video component can use the video's first frame as a poster automatically (no need for separate thumbnail images), which significantly simplifies the architecture. Discovered the importance of proper z-index layering and touch event handling in modals - the close button needed to be in a separate SafeAreaView overlay with `zIndex: 100` to prevent the video player from intercepting touch events. Understanding React Navigation's `useFocusEffect` hook was crucial for solving the background audio problem: videos need to check both scroll position (activeIndex) AND tab focus state (isScreenFocused) to determine if they should play. Also learned that portrait aspect ratios (9:16) require careful dimension calculations (120×213px for small thumbnails) and that horizontal ScrollView galleries with proper spacing create the Instagram-like browsing experience users expect.
+
+**What Was Created/Worked On:**
+Completely overhauled the family profile video gallery system in `app/family/[id].tsx`. Replaced landscape placeholder boxes (160×90) with portrait Video component thumbnails (120×213) that display the actual video's first frame. Implemented a full-screen modal video player using React Native's Modal component with fade animation, black background, native video controls, and a prominent close button. The modal includes SafeAreaView positioning, auto-play on open, and programmatic pause on close using a video ref. Added proper modal structure with separate overlay layers to ensure the close button remains clickable above the video player. Fixed critical background audio issue in `app/(tabs)/support.tsx` by implementing `useFocusEffect` hook that tracks screen focus state - videos now only play when both in view AND the Support tab is active. Updated video shouldPlay logic from `isActive` to `isActive && isScreenFocused`, automatically pausing all videos when users navigate to other tabs.
+
+**Next Goal:** Add video progress indicators or view count tracking to understand which family stories resonate most with users.

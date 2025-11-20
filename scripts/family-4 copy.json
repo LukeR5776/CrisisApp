@@ -1,0 +1,34 @@
+{
+  "name": "The Zyad Family",
+  "location": "Gaza, Palestine",
+  "situation": "Surviving in a war zone after homes were destroyed.",
+  "story": "Mohamed Zyad lives in Khan Younis, Gaza, and supports his family of ten, including his beautiful, months-old baby girl named Ayla. His family home was completely destroyed in the war. Mohamed and his family face extreme hardship daily, including starvation, lack of medicine, and displacement. Market prices for basic necessities, including baby formula for Ayla, are extremely high, and liquidity commission makes the situation even more difficult and the need greater. Other basic necessities beyond food, medicine, shelter, and evacuation costs that he needs support for include cold-weather clothing, hygiene products, and more. Please do what you can to help support this wonderful family and to give Ayla a chance at living a long and healthy life. Find Mohamed on Instagram to connect @smile__gaza",
+  "profile_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family4profile.jpeg",
+  "cover_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family4image.webp",
+  "video_url": ["https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-videos/Family4video1.mp4", "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-videos/Family4video2.mp4"],
+  "fundraising_link": "https://gofund.me/be2963017",
+  "fundraising_goal": 100000,
+  "fundraising_current": 3600,
+  "verified": true,
+  "tags": ["#Gaza", "#War", "#Baby"],
+  "needs": [
+    {
+      "id": "1",
+      "icon": "⛺️",
+      "title": "Shelter and CLothing",
+      "description": "Money for a new tent and clothing."
+    },
+    {
+      "id": "2",
+      "icon": "🍼",
+      "title": "Baby Supplies",
+      "description": "Money for baby formula, medicine, and other supplies."
+    },
+    {
+      "id": "3",
+      "icon": "🍞",
+      "title": "Feeding Family",
+      "description": "Money for food for our family."
+    }
+  ]
+}

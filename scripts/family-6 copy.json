@@ -1,0 +1,22 @@
+{
+  "name": "Cortney Lane",
+  "location": "Miami, Florida",
+  "situation": "Facing homelessness in Miami.",
+  "story": "Hello, my name is Cortney and I’m currently homeless in Miami-Dade County. I’ve been documenting my journey on TikTok under the name SinCasa2.0 for the past couple of weeks. I do have a job; however, I’m trying to get a small efficiency or apartment before the cold season. Anything would help me get closer to where I need to be to get an efficiency unit or small apartment. It would be really appreciated and documented on my TikTok page to inspire the next person.",
+  "profile_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family6profile.webp",
+  "cover_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family6image.png",
+  "video_url": ["https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-videos/Family6video1.mp4", "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-videos/Family6video2.mp4", "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-videos/Family6video2.mp4"],
+  "fundraising_link": "https://gofund.me/08e9a6e41",
+  "fundraising_goal": 3000,
+  "fundraising_current": 2900,
+  "verified": true,
+  "tags": ["#Homelessness", "#Miami", "#Father"],
+  "needs": [
+    {
+      "id": "1",
+      "icon": "🏠",
+      "title": "Housing",
+      "description": "Funds to acquire an apartment or small efficiency."
+    }
+  ]
+}

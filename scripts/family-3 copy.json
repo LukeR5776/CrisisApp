@@ -1,0 +1,34 @@
+{
+  "name": "Mohammed and Omar",
+  "location": "Gaza, Palestine",
+  "situation": "Surviving in a war zone after homes were destroyed.",
+  "story": "This campaign for supporting Mohammed herzallah and Omar Rasheed and their families financially, Omar and Mohammed are two young men from Gaza and they’ve evacuated so many times trying to survive and protect themselves and their families from the war, we hope by this campaign to rebuild our homes that damaged by the air strikes, help us to study abroad at good universities and to help us get food for us and our families, thanks for everyone supports us we really appreciate that.",
+  "profile_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family3profile.jpg",
+  "cover_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family3image.webp",
+  "video_url": ["https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-videos/Family3video1.mp4"],
+  "fundraising_link": "https://gofund.me/dc97044c3",
+  "fundraising_goal": 150000,
+  "fundraising_current": 42000,
+  "verified": true,
+  "tags": ["#Gaza", "#War", "#Education"],
+  "needs": [
+    {
+      "id": "1",
+      "icon": "🏠",
+      "title": "Rebuild Homes",
+      "description": "Rebuilding our homes that were damaged by air strikes."
+    },
+    {
+      "id": "2",
+      "icon": "🎓",
+      "title": "Education",
+      "description": "Money for studying abroad at good universities."
+    },
+    {
+      "id": "3",
+      "icon": "🍞",
+      "title": "Feeding Family",
+      "description": "Money for food for us and our families."
+    }
+  ]
+}

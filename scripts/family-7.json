@@ -1,0 +1,40 @@
+{
+  "name": "Marcus Johnson",
+  "location": "Portland, Oregon, USA",
+  "situation": "18-year-old facing homelessness while finishing senior year of high school.",
+  "story": "Hey, I'm Marcus. I'm 18 and currently living out of my car while trying to finish my last semester of high school. A lot of people have been following my TikTok where I share what daily life is really like when you're young and unhoused.\n\nI aged out of foster care six months ago, and things got really tough really fast. I'm working part-time at a fast food place, but it's not enough to cover rent in this city. I've been couch surfing when I can, but mostly I sleep in my 2008 Honda Civic in different parking lots.\n\nI'm determined to graduate this spring - I have a 3.4 GPA and I've been accepted to community college. But right now I'm struggling to afford gas to get to school and work, food, and basic hygiene supplies so I can stay clean for my job. I also need to save for first and last month's rent to get into a room somewhere.\n\nI share my story not for pity, but because I know I'm not alone. There are thousands of young people like me just trying to survive and build a better future. Any support helps me get one step closer to stability.",
+  "profile_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family7profile.png",
+  "cover_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family7image.png",
+  "video_url": ["https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-videos/Family7video1.mp4", "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-videos/Family7video2.mp4"],
+  "fundraising_link": "https://venmo.com/u/zeemer150",
+  "fundraising_goal": 8500,
+  "fundraising_current": 3420,
+  "verified": true,
+  "tags": ["#Homelessness", "#Education", "#Housing"],
+  "needs": [
+    {
+      "id": "1",
+      "icon": "🏠",
+      "title": "Housing Deposit",
+      "description": "First and last month's rent plus security deposit for a room."
+    },
+    {
+      "id": "2",
+      "icon": "🍱",
+      "title": "Food & Essentials",
+      "description": "Money for groceries, hygiene products, and basic necessities."
+    },
+    {
+      "id": "3",
+      "icon": "⛽",
+      "title": "Transportation",
+      "description": "Gas money and car maintenance to get to school and work."
+    },
+    {
+      "id": "4",
+      "icon": "📚",
+      "title": "School Supplies",
+      "description": "Materials needed to finish senior year and start community college."
+    }
+  ]
+}

@@ -38,7 +38,21 @@ export interface Post {
   hashtags: string[];
   likes: number;
   shares: number;
+  liked: boolean; // Has current user liked this post
   createdAt: string;
+}
+
+export interface Engagement {
+  id: string;
+  userId: string;
+  familyId: string;
+  engagementType: 'like' | 'share';
+  createdAt: string;
+}
+
+export interface EngagementCounts {
+  likesCount: number;
+  sharesCount: number;
 }
 
 export interface Donation {

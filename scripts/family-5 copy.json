@@ -1,0 +1,34 @@
+{
+  "name": "The Hatem Family",
+  "location": "Gaza, Palestine",
+  "situation": "Surviving in a war zone after homes were destroyed.",
+  "story": "My name is Shawqi, and I am a student currently studying in South Africa. I write to you today with a heavy heart but a determined spirit, reaching out from a place of safety that my own family does not have.\n\nMy brother, Mohammed, known to his 300,000 followers on Instagram as Gym Rat in Gaza for his incredible passion for fitness and life, is with our family, facing the unimaginable daily realities of the current crisis. Together, across thousands of miles, we are launching this campaign as a desperate plea to help our family survive.\n\nStill in Gaza are our beloved father and mother, our three younger brothers, our older sister and her husband, and our cherished grandmothers. They are a family of educators, dreamers, and kind souls who now face a daily struggle for the most basic necessities. The strength and resilience they show are incredible, but their resources have run out. My brother Mohammed, who once inspired his followers with his dedication to health, now channels every ounce of his strength into finding food, clean water, and a safe place for our family to rest.",
+  "profile_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family5profile.jpeg",
+  "cover_image_url": "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/Family5image.jpeg",
+  "video_url": ["https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-videos/Family5video1.mp4", "https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-videos/Family5video2.mp4"],
+  "fundraising_link": "https://chuffed.org/project/142592-help-gym-rat-and-his-family-survive-gazas-genocide",
+  "fundraising_goal": 170000,
+  "fundraising_current": 167000,
+  "verified": true,
+  "tags": ["#Gaza", "#War", "#Health"],
+  "needs": [
+    {
+      "id": "1",
+      "icon": "⛺️",
+      "title": "Shelter",
+      "description": "Money for temporary shelter and repairs."
+    },
+    {
+      "id": "2",
+      "icon": "🩹",
+      "title": "Medicine and Hygiene",
+      "description": "Money for medicine and hygiene products to stay healthy."
+    },
+    {
+      "id": "3",
+      "icon": "🍞",
+      "title": "Feeding Family",
+      "description": "Money for food and clean water."
+    }
+  ]
+}

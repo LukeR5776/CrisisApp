@@ -65,6 +65,7 @@ function transformDbRowToFamily(row: CrisisFamilyRow): CrisisFamily {
  */
 export async function fetchAllFamilies(options?: {
   limit?: number;
+  offset?: number;
   verified?: boolean;
   orderBy?: 'created_at' | 'name' | 'fundraising_current';
   ascending?: boolean;
@@ -84,9 +85,11 @@ export async function fetchAllFamilies(options?: {
     const ascending = options?.ascending || false;
     query = query.order(orderBy, { ascending });
 
-    // Apply limit
+    // Apply pagination (limit and offset)
     if (options?.limit) {
-      query = query.limit(options.limit);
+      const from = options?.offset || 0;
+      const to = from + options.limit - 1;
+      query = query.range(from, to);
     }
 
     const { data, error } = await query;

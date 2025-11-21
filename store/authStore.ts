@@ -232,7 +232,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   isEmailVerified: () => {
-    const { session } = get();
-    return session?.user?.email_confirmed_at !== undefined && session?.user?.email_confirmed_at !== null;
+    // DEMO MODE: Email verification disabled for demo purposes
+    // To re-enable: uncomment the lines below and remove the `return true;`
+    // const { session } = get();
+    // return session?.user?.email_confirmed_at !== undefined && session?.user?.email_confirmed_at !== null;
+    return true;
   },
 }));

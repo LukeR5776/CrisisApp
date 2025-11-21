@@ -3,7 +3,7 @@
  * Shows user stats, donation history, and recent posts
  */
 
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Alert, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../store/authStore';
@@ -13,8 +13,41 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuthStore();
   const profile = user?.profile;
 
-  // Safely get donation history (empty array if not available)
-  const donationHistory: any[] = [];
+  // Mock donation history totaling $67
+  const donationHistory = [
+    {
+      id: '1',
+      familyName: 'The Millican Family',
+      familyImage: 'https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/millican-profile.jpg',
+      amount: 25,
+      date: '2024-11-15',
+      pointsEarned: 250,
+    },
+    {
+      id: '2',
+      familyName: 'The Hewitt Family',
+      familyImage: 'https://zlthbhzfnozzrkvjxxuz.supabase.co/storage/v1/object/public/family-images/hewitt-profile.jpg',
+      amount: 20,
+      date: '2024-11-10',
+      pointsEarned: 200,
+    },
+    {
+      id: '3',
+      familyName: 'Mohammed and Omar',
+      familyImage: 'https://via.placeholder.com/100',
+      amount: 15,
+      date: '2024-11-05',
+      pointsEarned: 150,
+    },
+    {
+      id: '4',
+      familyName: 'The Zyad Family',
+      familyImage: 'https://via.placeholder.com/100',
+      amount: 7,
+      date: '2024-11-01',
+      pointsEarned: 70,
+    },
+  ];
 
   // Safely get recent posts (empty array if not available)
   const recentPosts: any[] = [];
@@ -35,6 +68,21 @@ export default function ProfileScreen() {
         },
       ]
     );
+  };
+
+  const handleShareProfile = async () => {
+    try {
+      await Share.share({
+        message: `Check out my supporter profile on Agape! I've donated $${profile?.total_donations || 67} to families in need. Join me in making a difference!`,
+        title: 'My Agape Profile',
+      });
+    } catch (error) {
+      console.error('Error sharing profile:', error);
+    }
+  };
+
+  const handleKeepSupporting = () => {
+    router.push('/(tabs)/stories');
   };
 
   return (
@@ -68,22 +116,19 @@ export default function ProfileScreen() {
             <Text style={styles.sectionTitle}>Your Contributions</Text>
             <Text style={styles.sectionSubtitle}>Current Stats</Text>
           </View>
-          <TouchableOpacity style={styles.viewDetailsButton}>
-            <Text style={styles.viewDetailsText}>View Details ›</Text>
-          </TouchableOpacity>
 
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Points Earned</Text>
-              <Text style={styles.statValue}>{profile?.points_earned || 0}</Text>
+              <Text style={styles.statValue}>{profile?.points_earned || 350}</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Total Donations</Text>
-              <Text style={styles.statValue}>${profile?.total_donations || 0}</Text>
+              <Text style={styles.statValue}>${profile?.total_donations || 67}</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Level</Text>
-              <Text style={styles.statValue}>{profile?.level || 1}</Text>
+              <Text style={styles.statValue}>{profile?.level || 5}</Text>
             </View>
           </View>
         </View>
@@ -94,88 +139,40 @@ export default function ProfileScreen() {
             <Text style={styles.sectionTitle}>Donation History</Text>
             <Text style={styles.sectionSubtitle}>Your Support Contributions</Text>
           </View>
-          {donationHistory.length > 0 && (
-            <TouchableOpacity style={styles.viewAllButton}>
-              <Text style={styles.viewAllText}>See All ›</Text>
-            </TouchableOpacity>
-          )}
 
-          {donationHistory.length > 0 ? (
-            donationHistory.map((donation) => (
-              <View key={donation.id} style={styles.donationCard}>
-                <Image
-                  source={{ uri: donation.familyImage }}
-                  style={styles.donationFamilyImage}
-                />
-                <View style={styles.donationInfo}>
-                  <Text style={styles.donationFamily}>
-                    Donation to {donation.familyName}
-                  </Text>
-                  <Text style={styles.donationAmount}>${donation.amount}</Text>
-                </View>
+          {donationHistory.map((donation) => (
+            <View key={donation.id} style={styles.donationCard}>
+              <Image
+                source={{ uri: donation.familyImage }}
+                style={styles.donationFamilyImage}
+              />
+              <View style={styles.donationInfo}>
+                <Text style={styles.donationFamily}>
+                  {donation.familyName}
+                </Text>
+                <Text style={styles.donationDate}>
+                  {new Date(donation.date).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </Text>
               </View>
-            ))
-          ) : (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateIcon}>💝</Text>
-              <Text style={styles.emptyStateTitle}>No donations yet</Text>
-              <Text style={styles.emptyStateText}>
-                Start supporting families in need to see your donation history here
-              </Text>
+              <Text style={styles.donationAmount}>${donation.amount}</Text>
             </View>
-          )}
+          ))}
         </View>
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleShareProfile}>
             <Text style={styles.actionButtonText}>Share Your Profile</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Invite Friends</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionButton, styles.donateButton]}>
+          <TouchableOpacity style={[styles.actionButton, styles.donateButton]} onPress={handleKeepSupporting}>
             <Text style={[styles.actionButtonText, styles.donateButtonText]}>
-              Donate Again
+              Keep Supporting
             </Text>
           </TouchableOpacity>
-        </View>
-
-        {/* Your Recent Posts */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Your Recent Posts</Text>
-            <Text style={styles.sectionSubtitle}>Keep Spreading the Word</Text>
-          </View>
-          <TouchableOpacity style={styles.viewAllButton}>
-            <Text style={styles.viewAllText}>See All ›</Text>
-          </TouchableOpacity>
-
-          {/* Placeholder posts */}
-          <View style={styles.postsGrid}>
-            <View style={styles.postCard}>
-              <View style={styles.postPlaceholder}>
-                <Text style={styles.postPlaceholderText}>
-                  Happy to support those in need!
-                </Text>
-              </View>
-              <View style={styles.postInfo}>
-                <Text style={styles.postInfoText}>#Support</Text>
-                <Text style={styles.postInfoName}>John Doe</Text>
-              </View>
-            </View>
-            <View style={styles.postCard}>
-              <View style={styles.postPlaceholder}>
-                <Text style={styles.postPlaceholderText}>
-                  Every little bit helps!
-                </Text>
-              </View>
-              <View style={styles.postInfo}>
-                <Text style={styles.postInfoText}>#Donations</Text>
-                <Text style={styles.postInfoName}>John Doe</Text>
-              </View>
-            </View>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -260,32 +257,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
   },
-  viewDetailsButton: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 16,
-    marginBottom: 16,
-  },
-  viewDetailsText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  viewAllButton: {
-    alignSelf: 'flex-end',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 16,
-    marginBottom: 12,
-  },
-  viewAllText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
   statsGrid: {
     flexDirection: 'row',
     gap: 12,
@@ -327,6 +298,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 4,
+  },
+  donationDate: {
+    fontSize: 12,
+    color: '#666',
   },
   donationAmount: {
     fontSize: 16,
@@ -374,59 +349,5 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     lineHeight: 20,
-  },
-  postsGrid: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
-  },
-  postCard: {
-    flex: 1,
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: '#f9f9f9',
-  },
-  postImage: {
-    width: '100%',
-    height: 150,
-  },
-  postOverlay: {
-    padding: 12,
-  },
-  postCaption: {
-    fontSize: 12,
-    marginBottom: 8,
-  },
-  postAuthor: {
-    flexDirection: 'row',
-    gap: 4,
-  },
-  postAuthorText: {
-    fontSize: 10,
-    color: '#0066FF',
-  },
-  postPlaceholder: {
-    height: 150,
-    backgroundColor: '#e0e0e0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  postPlaceholderText: {
-    fontSize: 12,
-    textAlign: 'center',
-    color: '#666',
-  },
-  postInfo: {
-    padding: 12,
-  },
-  postInfoText: {
-    fontSize: 10,
-    color: '#0066FF',
-    marginBottom: 4,
-  },
-  postInfoName: {
-    fontSize: 10,
-    color: '#999',
   },
 });

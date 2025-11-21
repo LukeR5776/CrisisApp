@@ -32,14 +32,16 @@ export interface Post {
   familyId: string;
   familyName: string;
   familyImage: string;
-  type: 'photo' | 'video';
-  mediaUrl: string;
+  type: 'photo' | 'video' | 'text';
+  mediaUrl?: string; // Optional for text posts
+  content?: string; // Text content for text posts
   caption: string;
   hashtags: string[];
   likes: number;
   shares: number;
   liked: boolean; // Has current user liked this post
   createdAt: string;
+  postType?: 'family' | 'update'; // Distinguish family cards vs text posts
 }
 
 export interface Engagement {
@@ -53,6 +55,15 @@ export interface Engagement {
 export interface EngagementCounts {
   likesCount: number;
   sharesCount: number;
+}
+
+export interface FamilyPost {
+  id: string;
+  familyId: string;
+  content: string;
+  hashtags: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Donation {

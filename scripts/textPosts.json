@@ -1,0 +1,114 @@
+[
+  {
+    "familyId": "c53bded3-976d-4f03-beee-001fb1057a19",
+    "familyName": "The Millican Family",
+    "posts": [
+      {
+        "content": "Day 5 in our temporary apartment. The kids are adjusting better than expected, and we finally have some stability. Grateful for every donation that helped us get here. 🙏",
+        "hashtags": ["#Recovery", "#Grateful", "#FireSurvivors"],
+        "daysAgo": 2
+      },
+      {
+        "content": "Insurance update: Still waiting on final approval but we're moving forward with rebuilding plans. Winter is coming fast and we need to act quickly. Your support keeps us strong.",
+        "hashtags": ["#Rebuilding", "#StayStrong", "#ChickamaugaStrong"],
+        "daysAgo": 6
+      }
+    ]
+  },
+  {
+    "familyId": "e35506e3-0e99-40d0-8d66-326914817bab",
+    "familyName": "The Hewitt Family",
+    "posts": [
+      {
+        "content": "Finally got water restored to the property after 3 weeks. Small victory but it means everything. Next step: clearing the damaged crops and replanting for next season.",
+        "hashtags": ["#Jamaica", "#HurricaneMelissa", "#Recovery"],
+        "daysAgo": 1
+      },
+      {
+        "content": "The community came together today to help rebuild our greenhouse. Seeing neighbors who lost just as much helping us rebuild... that's the Jamaica I know. Blessings to everyone. ❤️",
+        "hashtags": ["#TrelawnyStrong", "#CommunitySupport", "#Grateful"],
+        "daysAgo": 4
+      }
+    ]
+  },
+  {
+    "familyId": "9d0175ad-07f7-4b20-87bc-16a429f78a97",
+    "familyName": "Mohammed and Omar",
+    "posts": [
+      {
+        "content": "Omar started online classes today thanks to the laptop donation. First time I've seen him smile in weeks. Education is hope. Thank you to everyone who made this possible.",
+        "hashtags": ["#Education", "#Gaza", "#Hope"],
+        "daysAgo": 3
+      },
+      {
+        "content": "Medical supplies running critically low in our area. If anyone has connections to aid organizations working in Gaza, please reach out. We need antibiotics and bandages urgently.",
+        "hashtags": ["#UrgentNeed", "#GazaCrisis", "#HumanitarianAid"],
+        "daysAgo": 7
+      }
+    ]
+  },
+  {
+    "familyId": "a2c28ddc-9f48-4541-86ed-a1322d482557",
+    "familyName": "The Zyad Family",
+    "posts": [
+      {
+        "content": "Baby Ayla is thriving despite everything. She took her first steps today in this shelter. In the midst of chaos, life finds a way. We hold onto hope for her future.",
+        "hashtags": ["#BabyAyla", "#Hope", "#Resilience"],
+        "daysAgo": 1
+      },
+      {
+        "content": "Desperately need baby formula and diapers. Local supplies exhausted and shipments aren't getting through. Any help connecting us with humanitarian aid would save us.",
+        "hashtags": ["#UrgentNeed", "#Gaza", "#BabySupplies"],
+        "daysAgo": 5
+      }
+    ]
+  },
+  {
+    "familyId": "b506e41e-e11b-4442-8f8f-51c1ebd4697f",
+    "familyName": "The Hatem Family",
+    "posts": [
+      {
+        "content": "Managed to film a workout in the rubble today. People ask how I stay positive - movement is meditation. It keeps me sane when everything else is insane. Stay strong, everyone.",
+        "hashtags": ["#GymRatInGaza", "#FitnessMotivation", "#MentalHealth"],
+        "daysAgo": 2
+      },
+      {
+        "content": "Internet cafes charging $20/hour now due to electricity shortages. Can't afford to post content regularly anymore. If you can support, it helps me stay connected and share our reality.",
+        "hashtags": ["#Gaza", "#SocialMedia", "#StayConnected"],
+        "daysAgo": 8
+      }
+    ]
+  },
+  {
+    "familyId": "e26a5439-f3f3-4ce5-8e0b-70d9870fbb5f",
+    "familyName": "Marcus Johnson",
+    "posts": [
+      {
+        "content": "Got accepted into a job training program starting next month! First real opportunity since aging out of foster care. Feeling hopeful for the first time in months. Thank you all for believing in me.",
+        "hashtags": ["#JobTraining", "#NewBeginnings", "#Portland"],
+        "daysAgo": 1
+      },
+      {
+        "content": "Living in my car is getting harder as Portland winter approaches. Sleeping bags and warm clothes would help immensely. Also looking for any leads on transitional housing programs.",
+        "hashtags": ["#Homeless", "#WinterIsComing", "#NeedHelp"],
+        "daysAgo": 4
+      }
+    ]
+  },
+  {
+    "familyId": "e7b91251-7b86-42c3-a2c5-1f714bc5a58d",
+    "familyName": "Cortney Lane",
+    "posts": [
+      {
+        "content": "Day 47 on the streets. Someone stole my backpack with all my documents last night. Starting over again from nothing. If anyone knows resources for getting ID replacement in Miami, please share.",
+        "hashtags": ["#Miami", "#Homeless", "#StartingOver"],
+        "daysAgo": 2
+      },
+      {
+        "content": "Heat wave is brutal. The shelter is at capacity and I've been turned away 3 nights in a row. Water and sunscreen donations would be life-saving right now. Please, anything helps.",
+        "hashtags": ["#Heatwave", "#UrgentNeed", "#MiamiStrong"],
+        "daysAgo": 6
+      }
+    ]
+  }
+]

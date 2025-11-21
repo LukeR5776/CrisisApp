@@ -108,11 +108,13 @@ export default function RootLayout() {
 
     // User is signed in
     if (user) {
-      // Check if email is verified
-      if (!isEmailVerified() && !inVerifyEmail) {
-        // Redirect to verify email screen
-        router.replace('/verify-email');
-      } else if (isEmailVerified() && !inAuthGroup && !inPasswordReset) {
+      // DEMO MODE: Email verification disabled for demo purposes
+      // To re-enable: uncomment the 4 lines below
+      // if (!isEmailVerified() && !inVerifyEmail) {
+      //   // Redirect to verify email screen
+      //   router.replace('/verify-email');
+      // } else if (isEmailVerified() && !inAuthGroup && !inPasswordReset) {
+      if (!inAuthGroup && !inPasswordReset) {
         // Email verified, redirect to home
         router.replace('/(tabs)/home');
       }

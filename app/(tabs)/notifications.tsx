@@ -5,46 +5,58 @@
 
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState } from 'react';
 
 export default function NotificationsScreen() {
-  // Mock notifications data
-  const notifications = [
+  // Mock notifications data - updated to reflect current app state
+  const [notifications, setNotifications] = useState([
     {
       id: '1',
       type: 'donation',
-      message: 'Your donation to The Johnson Family was successful!',
+      message: 'Your donation to The Millican Family was successful!',
       time: '2 hours ago',
       unread: true,
     },
     {
       id: '2',
-      type: 'badge',
-      message: 'You earned a new badge: Generous Giver 💝',
+      type: 'update',
+      message: 'The Hewitt Family posted a new update',
       time: '5 hours ago',
       unread: true,
     },
     {
       id: '3',
-      type: 'update',
-      message: 'The Chen Family posted a new update',
+      type: 'milestone',
+      message: 'You reached Level 5! 🎉',
       time: '1 day ago',
       unread: false,
     },
     {
       id: '4',
-      type: 'milestone',
-      message: 'You reached Level 5! 🎉',
-      time: '2 days ago',
+      type: 'donation',
+      message: 'Your donation to The Zyad Family was successful!',
+      time: '3 days ago',
       unread: false,
     },
-  ];
+    {
+      id: '5',
+      type: 'update',
+      message: 'Mohammed and Omar posted a new update',
+      time: '5 days ago',
+      unread: false,
+    },
+  ]);
+
+  const handleMarkAllRead = () => {
+    setNotifications(notifications.map(notif => ({ ...notif, unread: false })));
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Notifications</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleMarkAllRead}>
           <Text style={styles.markAllRead}>Mark all read</Text>
         </TouchableOpacity>
       </View>

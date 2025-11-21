@@ -3,12 +3,16 @@
  * TikTok/Reels-style vertical video scrolling
  */
 
-import { View, Text, Dimensions, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, Dimensions, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Video, ResizeMode } from 'expo-av';
 import { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { fetchFamiliesWithVideos } from '../../lib/familiesService';
+import { toggleLike, getBatchEngagementCounts, getBatchLikeStates, recordShare } from '../../lib/engagementService';
+import { awardLikePoints, deductLikePoints, awardSharePoints } from '../../lib/pointsService';
+import { PointsToast } from '../../components/PointsToast';
 import type { CrisisFamily } from '../../types';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -34,6 +38,13 @@ export default function SupportScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isScreenFocused, setIsScreenFocused] = useState(true);
+  const [videoLikes, setVideoLikes] = useState<Map<string, { liked: boolean; count: number }>>(new Map());
+
+  // Points toast state
+  const [showPointsToast, setShowPointsToast] = useState(false);
+  const [pointsEarned, setPointsEarned] = useState(0);
+
+  const router = useRouter();
 
   // Pause videos when navigating away from this tab
   useFocusEffect(() => {
@@ -47,6 +58,19 @@ export default function SupportScreen() {
   useEffect(() => {
     loadVideos();
   }, []);
+
+  /**
+   * Fisher-Yates shuffle algorithm
+   * Randomizes array order for varied video display
+   */
+  function shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
 
   const loadVideos = async () => {
     try {
@@ -69,12 +93,102 @@ export default function SupportScreen() {
         }))
       );
 
-      setVideoPosts(allVideos);
+      // Shuffle videos for variety (families won't appear in order)
+      const shuffledVideos = shuffleArray(allVideos);
+      setVideoPosts(shuffledVideos);
+
+      // Fetch engagement data for all videos
+      const familyIds = data.map(f => f.id);
+      const [countsMap, likeStatesMap] = await Promise.all([
+        getBatchEngagementCounts(familyIds),
+        getBatchLikeStates(familyIds),
+      ]);
+
+      // Build videoLikes map
+      const likesMap = new Map<string, { liked: boolean; count: number }>();
+      familyIds.forEach(familyId => {
+        likesMap.set(familyId, {
+          liked: likeStatesMap.get(familyId) || false,
+          count: countsMap.get(familyId)?.likesCount || 0,
+        });
+      });
+      setVideoLikes(likesMap);
     } catch (err) {
       console.error('Error loading videos:', err);
       setError('Failed to load videos. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  /**
+   * Handle like button press
+   * Uses optimistic updates for instant UI feedback
+   * Awards 1 point for new likes, deducts 1 point for unlikes (silent)
+   */
+  const handleLike = async (item: VideoItem) => {
+    const currentState = videoLikes.get(item.familyId) || { liked: false, count: 0 };
+    const wasLiked = currentState.liked;
+
+    // Optimistic update
+    const newLikesMap = new Map(videoLikes);
+    newLikesMap.set(item.familyId, {
+      liked: !currentState.liked,
+      count: currentState.liked ? currentState.count - 1 : currentState.count + 1,
+    });
+    setVideoLikes(newLikesMap);
+
+    // Make API call
+    try {
+      await toggleLike(item.familyId);
+
+      // Award points for new likes, deduct for unlikes
+      if (!wasLiked) {
+        // New like - award point with toast
+        const success = await awardLikePoints();
+        if (success) {
+          setPointsEarned(1);
+          setShowPointsToast(true);
+        }
+      } else {
+        // Unlike - silently deduct point (no toast)
+        await deductLikePoints();
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      // Revert on error
+      const revertMap = new Map(videoLikes);
+      revertMap.set(item.familyId, currentState);
+      setVideoLikes(revertMap);
+    }
+  };
+
+  /**
+   * Handle share button press
+   * Opens native share sheet
+   * Awards 2 points for sharing
+   */
+  const handleShare = async (item: VideoItem) => {
+    try {
+      const result = await Share.share({
+        message: `Check out ${item.familyName}'s story on Agape!\n\n${item.familyStory.substring(0, 150)}...`,
+        title: `Support ${item.familyName}`,
+      });
+
+      // Only award points if user actually shared (not dismissed)
+      if (result.action === Share.sharedAction) {
+        // Record share in database (don't await - fire and forget)
+        recordShare(item.familyId).catch(console.error);
+
+        // Award points for sharing
+        const success = await awardSharePoints();
+        if (success) {
+          setPointsEarned(2);
+          setShowPointsToast(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
     }
   };
 
@@ -109,21 +223,18 @@ export default function SupportScreen() {
           )}
         </View>
 
-        {/* Top Action Buttons */}
-        <View style={styles.topActions}>
-          <TouchableOpacity style={styles.topActionButton}>
-            <Text style={styles.topActionText}>Share Story</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.topActionButton, styles.donateButton]}>
-            <Text style={[styles.topActionText, styles.donateButtonText]}>Donate Now</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Side Actions (Right side) */}
         <View style={styles.sideActions}>
-          <TouchableOpacity style={styles.sideActionButton}>
-            <Text style={styles.sideActionIcon}>❤️</Text>
-            <Text style={styles.sideActionText}>Like</Text>
+          <TouchableOpacity
+            style={styles.sideActionButton}
+            onPress={() => handleLike(item)}
+          >
+            <Text style={styles.sideActionIcon}>
+              {videoLikes.get(item.familyId)?.liked ? '❤️' : '🤍'}
+            </Text>
+            <Text style={styles.sideActionText}>
+              {videoLikes.get(item.familyId)?.count || 0}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.sideActionButton}>
@@ -131,17 +242,18 @@ export default function SupportScreen() {
             <Text style={styles.sideActionText}>Comment</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.sideActionButton}>
+          <TouchableOpacity
+            style={styles.sideActionButton}
+            onPress={() => handleShare(item)}
+          >
             <Text style={styles.sideActionIcon}>🔗</Text>
             <Text style={styles.sideActionText}>Share</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.sideActionButton}>
-            <Text style={styles.sideActionIcon}>🔔</Text>
-            <Text style={styles.sideActionText}>Notify</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.sideActionButton}>
+          <TouchableOpacity
+            style={styles.sideActionButton}
+            onPress={() => router.push(`/family/${item.familyId}`)}
+          >
             <Text style={styles.sideActionIcon}>👤</Text>
             <Text style={styles.sideActionText}>Profile</Text>
           </TouchableOpacity>
@@ -166,13 +278,16 @@ export default function SupportScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={[]}>
+      {/* Points Toast Overlay */}
+      <PointsToast
+        points={pointsEarned}
+        visible={showPointsToast}
+        onComplete={() => setShowPointsToast(false)}
+      />
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity>
-          <Text style={styles.backButton}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Support (Reels-like Scrolling)</Text>
-        <View style={{ width: 32 }} />
+        <Text style={styles.headerTitle}>Support</Text>
       </View>
 
       {/* Loading State */}
@@ -228,8 +343,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -239,11 +353,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
-  },
-  backButton: {
-    fontSize: 32,
-    fontWeight: '300',
-    color: '#fff',
   },
   headerTitle: {
     fontSize: 16,
@@ -272,35 +381,6 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: '#666',
     fontSize: 18,
-  },
-  topActions: {
-    position: 'absolute',
-    top: 60,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-  },
-  topActionButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
-  },
-  topActionText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  donateButton: {
-    backgroundColor: '#000',
-  },
-  donateButtonText: {
-    color: '#fff',
   },
   sideActions: {
     position: 'absolute',

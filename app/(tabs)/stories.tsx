@@ -3,18 +3,23 @@
  * Grid view of featured crisis families with filtering
  */
 
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, ActivityIndicator, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { fetchAllFamilies } from '../../lib/familiesService';
 import type { CrisisFamily } from '../../types';
 
+type LocationFilter = 'All' | 'US' | 'Palestine' | 'Jamaica';
+
 export default function StoriesScreen() {
   const router = useRouter();
+  const [allFamilies, setAllFamilies] = useState<CrisisFamily[]>([]);
   const [families, setFamilies] = useState<CrisisFamily[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [locationFilter, setLocationFilter] = useState<LocationFilter>('All');
+  const [showFilterModal, setShowFilterModal] = useState(false);
 
   // Fetch families from Supabase on mount
   useEffect(() => {
@@ -26,6 +31,7 @@ export default function StoriesScreen() {
       setLoading(true);
       setError(null);
       const data = await fetchAllFamilies();
+      setAllFamilies(data);
       setFamilies(data);
     } catch (err) {
       console.error('Error loading families:', err);
@@ -33,6 +39,37 @@ export default function StoriesScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Filter families when location filter changes
+  useEffect(() => {
+    if (locationFilter === 'All') {
+      setFamilies(allFamilies);
+    } else {
+      const filtered = allFamilies.filter(family => {
+        const location = family.location.toLowerCase();
+        switch (locationFilter) {
+          case 'US':
+            return location.includes('united states') || location.includes('us') ||
+                   location.includes('usa') || location.includes('georgia') ||
+                   location.includes('california') || location.includes('texas') ||
+                   location.includes('florida') || location.includes('new york');
+          case 'Palestine':
+            return location.includes('palestine') || location.includes('gaza') ||
+                   location.includes('west bank');
+          case 'Jamaica':
+            return location.includes('jamaica');
+          default:
+            return true;
+        }
+      });
+      setFamilies(filtered);
+    }
+  }, [locationFilter, allFamilies]);
+
+  const handleFilterSelect = (filter: LocationFilter) => {
+    setLocationFilter(filter);
+    setShowFilterModal(false);
   };
 
   // Navigate to family profile
@@ -93,11 +130,6 @@ export default function StoriesScreen() {
           <Text style={styles.sectionTitle}>Support Families</Text>
           <Text style={styles.sectionSubtitle}>Discover How You Can Help</Text>
         </View>
-        <View style={styles.supportButtons}>
-          <TouchableOpacity style={styles.supportButton}>
-            <Text style={styles.supportButtonText}>Support Now</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </>
   );
@@ -106,11 +138,79 @@ export default function StoriesScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Stories (Explore page)</Text>
-        <TouchableOpacity style={styles.iconButton}>
+        <Text style={styles.headerTitle}>Explore</Text>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => setShowFilterModal(true)}
+        >
           <Text style={styles.icon}>🔍</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Location Filter Modal */}
+      <Modal
+        visible={showFilterModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowFilterModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowFilterModal(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Filter by Location</Text>
+
+            <TouchableOpacity
+              style={[styles.filterOption, locationFilter === 'All' && styles.filterOptionActive]}
+              onPress={() => handleFilterSelect('All')}
+            >
+              <Text style={[styles.filterOptionText, locationFilter === 'All' && styles.filterOptionTextActive]}>
+                All Locations
+              </Text>
+              {locationFilter === 'All' && <Text style={styles.checkmark}>✓</Text>}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.filterOption, locationFilter === 'US' && styles.filterOptionActive]}
+              onPress={() => handleFilterSelect('US')}
+            >
+              <Text style={[styles.filterOptionText, locationFilter === 'US' && styles.filterOptionTextActive]}>
+                United States
+              </Text>
+              {locationFilter === 'US' && <Text style={styles.checkmark}>✓</Text>}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.filterOption, locationFilter === 'Palestine' && styles.filterOptionActive]}
+              onPress={() => handleFilterSelect('Palestine')}
+            >
+              <Text style={[styles.filterOptionText, locationFilter === 'Palestine' && styles.filterOptionTextActive]}>
+                Palestine
+              </Text>
+              {locationFilter === 'Palestine' && <Text style={styles.checkmark}>✓</Text>}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.filterOption, locationFilter === 'Jamaica' && styles.filterOptionActive]}
+              onPress={() => handleFilterSelect('Jamaica')}
+            >
+              <Text style={[styles.filterOptionText, locationFilter === 'Jamaica' && styles.filterOptionTextActive]}>
+                Jamaica
+              </Text>
+              {locationFilter === 'Jamaica' && <Text style={styles.checkmark}>✓</Text>}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setShowFilterModal(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Loading State */}
       {loading && (
@@ -226,9 +326,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     marginTop: 16,
     marginBottom: 16,
     paddingHorizontal: 16,
@@ -241,21 +338,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     marginTop: 2,
-  },
-  supportButtons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  supportButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#000',
-    borderRadius: 16,
-  },
-  supportButtonText: {
-    fontSize: 11,
-    color: '#fff',
-    fontWeight: '500',
   },
   familyCard: {
     width: '48%',
@@ -325,5 +407,71 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    width: '100%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  filterOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+    backgroundColor: '#f5f5f5',
+  },
+  filterOptionActive: {
+    backgroundColor: '#E6F0FF',
+    borderWidth: 2,
+    borderColor: '#0066FF',
+  },
+  filterOptionText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+  },
+  filterOptionTextActive: {
+    color: '#0066FF',
+    fontWeight: '600',
+  },
+  checkmark: {
+    fontSize: 18,
+    color: '#0066FF',
+    fontWeight: '700',
+  },
+  cancelButton: {
+    marginTop: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
   },
 });

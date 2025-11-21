@@ -149,7 +149,7 @@ export default function SignIn() {
       >
         <View style={styles.content}>
           {/* App Name */}
-          <Text style={styles.appName}>CrisisApp</Text>
+          <Text style={styles.appName}>Agape</Text>
 
           {/* Auth Form Section */}
           <View style={styles.formSection}>
